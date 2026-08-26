@@ -1,0 +1,92 @@
+<script>
+(function(){
+  var WORKER_BASE = "https://rostas-licence.newsletters-432.workers.dev";
+  var CANCEL_URL = "https://rostas.app/";
+
+  // Matched by exact visible button text -- robust even if you re-export
+  // a slightly different design from Claude Design later, as long as the
+  // wording stays close to this.
+  var BUTTON_MATCHERS = [
+    { text: "start free trial",  plan: "monthly" },
+    { text: "subscribe monthly", plan: "monthly" },
+    { text: "subscribe annually", plan: "annual" }
+  ];
+
+  function findCandidates(){
+    var els = document.querySelectorAll("a.btn, button.btn");
+    var out = [];
+    for (var i = 0; i < els.length; i++){
+      var el = els[i];
+      if (el.getAttribute("data-rostas-wired")) continue;
+      var text = (el.textContent || "").trim().toLowerCase();
+      for (var j = 0; j < BUTTON_MATCHERS.length; j++){
+        if (text === BUTTON_MATCHERS[j].text){
+          out.push({ el: el, plan: BUTTON_MATCHERS[j].plan });
+          break;
+        }
+      }
+    }
+    return out;
+  }
+
+  function wireButton(el, plan){
+    el.setAttribute("data-rostas-wired", "1");
+    el.addEventListener("click", function(e){
+      e.preventDefault();
+      startCheckout(el, plan);
+    });
+  }
+
+  function startCheckout(el, plan){
+    if (el.getAttribute("data-rostas-loading")) return;
+    el.setAttribute("data-rostas-loading", "1");
+    var originalText = el.textContent;
+    el.textContent = "Redirecting…";
+    fetch(WORKER_BASE + "/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "subscription",
+        plan: plan,
+        cancelUrl: CANCEL_URL
+      })
+    }).then(function(r){ return r.json(); })
+      .then(function(data){
+        if (data && data.ok && data.url){
+          window.location.href = data.url;
+        } else {
+          el.textContent = "Try again";
+          el.removeAttribute("data-rostas-loading");
+          console.error("[rostas checkout]", data);
+        }
+      })
+      .catch(function(err){
+        el.textContent = "Try again";
+        el.removeAttribute("data-rostas-loading");
+        console.error("[rostas checkout]", err);
+      });
+  }
+
+  function scan(){
+    var found = findCandidates();
+    for (var i = 0; i < found.length; i++){
+      wireButton(found[i].el, found[i].plan);
+    }
+  }
+
+  // The bundler unpacks page content asynchronously, so poll briefly
+  // rather than relying on a single DOMContentLoaded pass.
+  var attempts = 0;
+  var maxAttempts = 40; // ~20s at 500ms
+  var interval = setInterval(function(){
+    scan();
+    attempts++;
+    if (attempts >= maxAttempts) clearInterval(interval);
+  }, 500);
+
+  var observer = new MutationObserver(function(){ scan(); });
+  if (document.body) {
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+})();
+</script>
