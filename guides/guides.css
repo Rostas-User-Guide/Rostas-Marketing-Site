@@ -1,0 +1,254 @@
+/* Rostas guides — shared stylesheet
+   Hand-authored to match the rostas.app brand tokens (navy / gold / DM Sans + Lora).
+   Kept deliberately outside the Claude Design / bundler export pipeline —
+   see rostas-marketing-site/README.md for why. */
+
+:root {
+  --navy: #1a2e4a;
+  --navy-dark: #11203a;
+  --text: #1e2d3d;
+  --muted: #5b7185;
+  --bg: #f7f9fb;
+  --card-bg: #ffffff;
+  --card-border: #dde4ed;
+  --gold: #b8932a;
+  --gold-dark: #93741f;
+  --nav-link: #c9d8e8;
+  --footer-text: #a8bdd4;
+  --green: #2f7a4d;
+  --green-bg: #e9f5ee;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "DM Sans", "Helvetica Neue", system-ui, -apple-system, sans-serif;
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+h1, h2, h3 {
+  font-family: "Lora", "Iowan Old Style", "Apple Garamond", Georgia, serif;
+  color: var(--navy);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+h1 { font-size: clamp(32px, 5vw, 52px); margin-bottom: 16px; }
+h2 { font-size: clamp(24px, 3.2vw, 32px); margin: 48px 0 16px; }
+h3 { font-size: 20px; margin: 28px 0 10px; }
+
+p { margin: 0 0 16px; max-width: 720px; }
+ul, ol { margin: 0 0 20px; padding-left: 24px; max-width: 720px; }
+li { margin-bottom: 8px; }
+
+a { color: var(--gold-dark); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.eyebrow {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+  margin-bottom: 12px;
+}
+
+/* Header */
+header.site-header {
+  background: var(--navy);
+  padding: 18px 24px;
+}
+.header-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.brand {
+  color: #ffffff;
+  font-family: "Lora", Georgia, serif;
+  font-weight: 700;
+  font-size: 20px;
+  text-decoration: none;
+}
+.brand:hover { text-decoration: none; opacity: 0.9; }
+.header-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.header-links a {
+  color: var(--nav-link);
+  font-size: 14px;
+  font-weight: 500;
+}
+.header-links a:hover { color: #ffffff; }
+.btn {
+  display: inline-block;
+  background: var(--gold);
+  color: #ffffff !important;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none !important;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--gold-dark); }
+
+/* Layout */
+main {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 56px 24px 24px;
+}
+.hero {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 56px 24px 8px;
+}
+.hero p.lede {
+  font-size: 19px;
+  color: var(--muted);
+  max-width: 680px;
+}
+
+/* Cards */
+.card {
+  background: var(--card-bg);
+  border: 0.8px solid var(--card-border);
+  border-radius: 16px;
+  box-shadow: 0 12px 36px rgba(26,46,74,0.10), 0 2px 8px rgba(26,46,74,0.06);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.card h3 { margin-top: 0; }
+
+.guide-grid {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 8px 24px 64px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+.guide-grid .card a.card-link {
+  color: var(--navy);
+  text-decoration: none;
+  display: block;
+}
+.guide-grid .card a.card-link:hover h3 { color: var(--gold-dark); }
+.guide-grid .card p { color: var(--muted); margin-bottom: 0; }
+
+/* Callouts */
+.callout {
+  background: var(--green-bg);
+  border-left: 4px solid var(--green);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 20px 0 28px;
+  max-width: 720px;
+}
+.callout p { margin-bottom: 0; color: var(--text); }
+
+/* Table */
+table.roster-table {
+  width: 100%;
+  max-width: 720px;
+  border-collapse: collapse;
+  margin: 20px 0 28px;
+  font-size: 15px;
+  background: var(--card-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(26,46,74,0.08);
+}
+table.roster-table th, table.roster-table td {
+  border: 1px solid var(--card-border);
+  padding: 10px 12px;
+  text-align: left;
+}
+table.roster-table th {
+  background: var(--navy);
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+table.roster-table tr:nth-child(even) td { background: #fafbfd; }
+
+.step-list { counter-reset: step; list-style: none; padding-left: 0; max-width: 720px; }
+.step-list li {
+  position: relative;
+  padding-left: 44px;
+  margin-bottom: 20px;
+}
+.step-list li::before {
+  counter-increment: step;
+  content: counter(step);
+  position: absolute;
+  left: 0; top: 0;
+  width: 28px; height: 28px;
+  background: var(--navy);
+  color: #fff;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* CTA band */
+.cta-band {
+  background: var(--navy);
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 780px;
+  margin: 48px auto 0;
+  text-align: center;
+}
+.cta-band h2 { color: #fff; margin-top: 0; }
+.cta-band p { color: var(--nav-link); margin: 0 auto 24px; }
+
+/* Footer */
+footer.site-footer {
+  background: var(--navy-dark);
+  color: var(--footer-text);
+  padding: 40px 24px;
+  margin-top: 64px;
+  font-size: 14px;
+}
+.footer-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 24px;
+}
+.footer-inner a { color: var(--footer-text); }
+.footer-inner a:hover { color: #fff; }
+.footer-bottom {
+  max-width: 1080px;
+  margin: 24px auto 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 16px;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+@media (max-width: 640px) {
+  main, .hero, .guide-grid { padding-left: 20px; padding-right: 20px; }
+  .cta-band { padding: 28px 20px; }
+}
