@@ -3,6 +3,12 @@
   var WORKER_BASE = "https://rostas-licence.newsletters-432.workers.dev";
   var CANCEL_URL = "https://rostas.app/";
 
+  // BETA MODE: when true, the checkout buttons show a "still testing"
+  // message with an email contact instead of calling Stripe. Flip to
+  // false (and nothing else) to restore live checkout once ready.
+  var BETA_MODE = true;
+  var BETA_EMAIL = "info@rostas.app";
+
   // Matched by exact visible button text -- robust even if you re-export
   // a slightly different design from Claude Design later, as long as the
   // wording stays close to this.
@@ -33,8 +39,77 @@
     el.setAttribute("data-rostas-wired", "1");
     el.addEventListener("click", function(e){
       e.preventDefault();
-      startCheckout(el, plan);
+      if (BETA_MODE){
+        showBetaModal();
+      } else {
+        startCheckout(el, plan);
+      }
     });
+  }
+
+  function showBetaModal(){
+    if (document.getElementById("rostas-beta-modal")) return;
+
+    var overlay = document.createElement("div");
+    overlay.id = "rostas-beta-modal";
+    overlay.setAttribute("style", [
+      "position:fixed", "inset:0", "z-index:99999",
+      "background:rgba(17,32,58,0.55)",
+      "display:flex", "align-items:center", "justify-content:center",
+      "padding:20px", "font-family:'DM Sans',system-ui,sans-serif"
+    ].join(";"));
+
+    var box = document.createElement("div");
+    box.setAttribute("style", [
+      "background:#ffffff", "border-radius:16px", "max-width:420px",
+      "width:100%", "padding:32px", "box-shadow:0 20px 60px rgba(0,0,0,0.3)",
+      "text-align:center"
+    ].join(";"));
+
+    var heading = document.createElement("h3");
+    heading.textContent = "We're still beta testing";
+    heading.setAttribute("style", [
+      "font-family:'Lora',serif", "color:#1a2e4a", "font-size:22px",
+      "margin:0 0 12px 0"
+    ].join(";"));
+
+    var body = document.createElement("p");
+    body.setAttribute("style", "color:#3d4a5c;font-size:15px;line-height:1.5;margin:0 0 24px 0;");
+    body.textContent = "Rostas isn't open for signups yet. If you'd like to join our testing programme in New Zealand or Australia, email us at ";
+    var link = document.createElement("a");
+    link.href = "mailto:" + BETA_EMAIL;
+    link.textContent = BETA_EMAIL;
+    link.setAttribute("style", "color:#b8932a;font-weight:600;text-decoration:none;");
+    body.appendChild(link);
+    var tail = document.createTextNode(" and we'll be in touch.");
+    body.appendChild(tail);
+
+    var closeBtn = document.createElement("button");
+    closeBtn.textContent = "Close";
+    closeBtn.setAttribute("style", [
+      "background:#1a2e4a", "color:#ffffff", "border:none",
+      "border-radius:8px", "padding:10px 24px", "font-size:14px",
+      "font-weight:600", "cursor:pointer"
+    ].join(";"));
+    closeBtn.addEventListener("click", closeModal);
+
+    function closeModal(){
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      document.removeEventListener("keydown", onKeydown);
+    }
+    function onKeydown(e){
+      if (e.key === "Escape") closeModal();
+    }
+    overlay.addEventListener("click", function(e){
+      if (e.target === overlay) closeModal();
+    });
+    document.addEventListener("keydown", onKeydown);
+
+    box.appendChild(heading);
+    box.appendChild(body);
+    box.appendChild(closeBtn);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
   }
 
   function startCheckout(el, plan){
