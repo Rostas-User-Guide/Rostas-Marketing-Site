@@ -36,6 +36,16 @@ USAGE
 -----
     python3 splice-checkout.py <fresh-export.html> <output.html>
 
+BUTTON CHECK (added 10 Oct 2026)
+--------------------------------
+Splicing the script in is not enough: the script finds its buttons by
+their exact wording, so a design that renames a pricing button leaves it
+doing nothing, with no error anywhere. This script therefore reads the
+wordings out of BUTTON_MATCHERS in checkout-script.html, lists every
+button in the export's pricing section, and aborts if any of them would
+not be wired. Add `--allow-unwired-buttons` to turn that abort into a
+warning (for a pricing-section button that is meant to be a plain link).
+
 `checkout-script.html`, in this same folder, is the canonical script this
 splices in. If the checkout flow itself ever needs to change (a new plan,
 a different worker URL, etc.), edit checkout-script.html -- not a copy
@@ -54,14 +64,100 @@ import sys
 import os
 import re
 import json
+import html
+
+ALLOW_FLAG = "--allow-unwired-buttons"
+
+
+def load_matchers(raw_script):
+    """Read the button wordings out of BUTTON_MATCHERS in checkout-script.html.
+
+    Returns a list of (text, pricing_only). Read from the script itself so
+    there is one list of wordings, not two that can drift apart.
+    """
+    block = re.search(r"var BUTTON_MATCHERS\s*=\s*\[(.*?)\];", raw_script, re.S)
+    if not block:
+        return []
+    out = []
+    for entry in re.finditer(r"\{([^{}]*)\}", block.group(1)):
+        body = entry.group(1)
+        text = re.search(r'text:\s*"([^"]+)"', body)
+        if not text:
+            continue
+        pricing_only = bool(re.search(r"pricingOnly:\s*true", body))
+        out.append((text.group(1), pricing_only))
+    return out
+
+
+def pricing_span(page):
+    """(start, end) of the element with id="pricing", or None if there isn't one."""
+    m = re.search(r'<(\w+)\b[^>]*\bid=["\']pricing["\'][^>]*>', page)
+    if not m:
+        return None
+    tag = m.group(1)
+    depth = 0
+    for t in re.finditer(r"<(/?)" + tag + r"\b[^>]*>", page[m.start():]):
+        depth += -1 if t.group(1) else 1
+        if depth == 0:
+            return (m.start(), m.start() + t.end())
+    return (m.start(), len(page))
+
+
+def check_buttons(page, matchers):
+    """Work out, from the page's HTML, which buttons the checkout script
+    will wire up once the page is live. Mirrors findCandidates() in
+    checkout-script.html: an <a> or <button> with the class "btn" whose
+    whole visible text equals one of the wordings (any capitals).
+
+    Returns (rows, problem). rows is a list of (text, wired) for every
+    button in the pricing section. problem is None when all is well, or a
+    sentence saying what is wrong.
+    """
+    span = pricing_span(page)
+    rows = []
+    for m in re.finditer(r"<(a|button)\b([^>]*)>(.*?)</\1>", page, re.S):
+        cls = re.search(r'class=["\']([^"\']*)["\']', m.group(2))
+        if not cls or "btn" not in cls.group(1).split():
+            continue
+        in_pricing = span is None or (span[0] <= m.start() < span[1])
+        if not in_pricing:
+            continue
+        # textContent: tags removed, entities decoded, ends trimmed. Inner
+        # whitespace is deliberately NOT tidied -- the live script doesn't.
+        text = html.unescape(re.sub(r"<[^>]+>", "", m.group(3))).strip()
+        wired = any(text.lower() == wording for wording, _ in matchers)
+        rows.append((text, wired))
+
+    if span is None:
+        wired_rows = [r for r in rows if r[1]]
+        if not wired_rows:
+            return wired_rows, (
+                'the page has no section with id="pricing", and no button '
+                "anywhere on it carries a wording the checkout script "
+                "recognises."
+            )
+        return wired_rows, None
+    if not rows:
+        return rows, "the pricing section has no buttons at all."
+    dead = [text for text, wired in rows if not wired]
+    if dead:
+        return rows, (
+            "these pricing buttons carry a wording the checkout script does "
+            "not recognise, so they would do nothing when clicked: "
+            + ", ".join(repr(t) for t in dead) + "."
+        )
+    return rows, None
 
 
 def main():
-    if len(sys.argv) != 3:
-        print("Usage: python3 splice-checkout.py <fresh-export.html> <output.html>")
+    args = [a for a in sys.argv[1:] if a != ALLOW_FLAG]
+    allow_unwired = ALLOW_FLAG in sys.argv[1:]
+    if len(args) != 2:
+        print("Usage: python3 splice-checkout.py <fresh-export.html> "
+              "<output.html> [" + ALLOW_FLAG + "]")
         sys.exit(1)
 
-    src_path, out_path = sys.argv[1], sys.argv[2]
+    src_path, out_path = args[0], args[1]
     script_path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "checkout-script.html"
     )
@@ -135,12 +231,40 @@ def main():
               "written.")
         sys.exit(1)
 
+    # ---- Would the pricing buttons actually be wired? (added 10 Oct 2026) ----
+    # The checkout script finds its buttons by their exact wording. If a new
+    # design renames a pricing button to a wording the script doesn't know,
+    # everything above still passes and the page still looks right -- the
+    # button just does nothing. Catch that here, before anything is written.
+    matchers = load_matchers(raw_script)
+    if not matchers:
+        print("ABORT: could not read the BUTTON_MATCHERS list out of "
+              "checkout-script.html. Nothing written.")
+        sys.exit(1)
+    rows, problem = check_buttons(parsed, matchers)
+    print("Pricing buttons found in this export:")
+    for text, wired in rows:
+        print(f"    {'wired' if wired else 'NOT WIRED':<10} {text!r}")
+    if problem:
+        known = ", ".join(repr(w) for w, _ in matchers)
+        if allow_unwired:
+            print(f"WARNING ({ALLOW_FLAG} given, carrying on): {problem}")
+        else:
+            print(f"ABORT: {problem} Nothing written.")
+            print(f"Wordings the script recognises (any capitals): {known}.")
+            print("Fix: either give the button one of those wordings in "
+                  "Claude Design (exact words, no icon inside the button) "
+                  "and export again, or add the new wording to "
+                  "BUTTON_MATCHERS in scripts/checkout-script.html first.")
+            sys.exit(1)
+
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(new_data)
 
     print(f"OK -- wrote {out_path}")
     print("Verified: JSON.parse succeeds on the embedded template, it still "
-          "ends in </body></html>, and all checkout markers are present.")
+          "ends in </body></html>, all checkout markers are present, and "
+          "every pricing button carries a wording the script recognises.")
     print("Next: deploy this file (not the original export), then check "
           "rostas.app live in a real browser -- see this script's docstring "
           "for the exact console check.")

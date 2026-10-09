@@ -76,7 +76,15 @@ opens the beta message, never a checkout), "Start free trial", "Subscribe
 monthly", "Subscribe annually". If Claude Design gives a pricing button
 any other wording, or adds an icon to it, add that wording to
 `BUTTON_MATCHERS` in `scripts/checkout-script.html` **before** uploading
-the export — otherwise the button silently does nothing.
+the export.
+
+Since 10 Oct 2026 the splice step checks this itself. It lists every
+button in the export's pricing section and stops, without touching
+`index.html`, if any of them carries a wording the script does not
+recognise. The site keeps serving the previous page and the failed run's
+log names the button. (`--allow-unwired-buttons` on the command line
+turns the stop into a warning, for a pricing-section button that is
+meant to be an ordinary link.)
 
 ## Where things are
 
