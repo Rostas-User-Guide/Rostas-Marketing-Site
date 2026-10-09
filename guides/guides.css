@@ -251,4 +251,78 @@ footer.site-footer {
 @media (max-width: 640px) {
   main, .hero, .guide-grid { padding-left: 20px; padding-right: 20px; }
   .cta-band { padding: 28px 20px; }
+  /* The six-column roster table is wider than a phone. It scrolls sideways
+     inside its own box, so the page itself does not. Added 10 Oct 2026. */
+  table.roster-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+
+
+/* Legal pages (/privacy and /terms). Added 10 Oct 2026.
+   Everything below uses class names of its own, so the guides pages are unaffected. */
+main.legal h2 { font-size: clamp(21px, 2.6vw, 26px); margin: 40px 0 12px; }
+main.legal h3 { font-size: 18px; margin: 20px 0 8px; }
+main.legal address { font-style: normal; margin-bottom: 16px; }
+.legal-meta { color: var(--muted); font-size: 15px; }
+.legal-toc { columns: 2; column-gap: 32px; font-size: 15px; padding-left: 20px; }
+.legal-toc li { margin-bottom: 4px; break-inside: avoid; }
+
+table.legal-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0 24px;
+  font-size: 15px;
+  line-height: 1.5;
+  background: var(--card-bg);
+}
+table.legal-table th, table.legal-table td {
+  border: 1px solid var(--card-border);
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+table.legal-table th {
+  background: var(--navy);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.draft-banner {
+  background: #fff4d6;
+  border-bottom: 2px solid var(--gold);
+  color: var(--text);
+  text-align: center;
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.draft-note {
+  background: #fff4d6;
+  border-left: 4px solid var(--gold);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 0 0 16px;
+  max-width: 720px;
+  font-size: 15px;
+}
+.footer-bottom a { color: var(--footer-text); }
+.footer-bottom a:hover { color: #fff; }
+
+@media (max-width: 640px) {
+  .legal-toc { columns: 1; }
+  /* On a phone each table row becomes a small stacked card, with the column heading above each value. */
+  table.legal-table, table.legal-table tbody, table.legal-table tr, table.legal-table td { display: block; width: 100%; }
+  table.legal-table thead { position: absolute; left: -9999px; }
+  table.legal-table tr { border: 1px solid var(--card-border); border-bottom: 0; padding: 12px 14px 4px; }
+  table.legal-table tr:last-child { border-bottom: 1px solid var(--card-border); }
+  table.legal-table td { border: 0; padding: 0 0 10px; }
+  table.legal-table td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
 }
