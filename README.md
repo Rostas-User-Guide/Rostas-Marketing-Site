@@ -61,15 +61,22 @@ Paste into the browser console on `rostas.app` (a real deploy takes a
 minute or two to propagate):
 
 ```js
-Array.from(document.querySelectorAll('a.btn,button.btn'))
-  .filter(el => /start free trial|subscribe monthly|subscribe annually/i
-    .test(el.textContent.trim()))
-  .map(el => el.getAttribute('data-rostas-wired'))
+Array.from(document.querySelectorAll('#pricing a.btn, #pricing button.btn'))
+  .map(el => el.textContent.trim() + ' = ' + el.getAttribute('data-rostas-wired'))
 ```
 
-All three should print `"1"`. If any is `null`, something's still wrong
+It lists every button in the pricing section. There should be three, and
+all three should end `= 1`. If any ends `= null`, something's still wrong
 on the deployed copy even if the Action succeeded — check you're not
 looking at a cached response.
+
+**Button wording the script recognises** (exact text, any capitals, no
+icon inside the button): "Join the beta" (pricing section only — always
+opens the beta message, never a checkout), "Start free trial", "Subscribe
+monthly", "Subscribe annually". If Claude Design gives a pricing button
+any other wording, or adds an icon to it, add that wording to
+`BUTTON_MATCHERS` in `scripts/checkout-script.html` **before** uploading
+the export — otherwise the button silently does nothing.
 
 ## Where things are
 
@@ -81,6 +88,13 @@ looking at a cached response.
   the next time `raw-export.html` changes; edit `raw-export.html` (via a
   fresh Claude Design export) or `scripts/checkout-script.html` instead.
 - `sw.js` — kill-switch service worker.
+- `privacy.html`, `terms.html` — the Privacy Policy and Terms of Service,
+  served at `/privacy` and `/terms`. Plain hand-written pages, outside the
+  Claude Design export, styled by `guides/guides.css`. If the data
+  handling in the Workers or the app changes, the privacy page must
+  change with it.
+- `guides/` — the free guides hub and articles, plus the shared
+  stylesheet `guides.css`.
 - `scripts/checkout-script.html` — canonical Stripe checkout wiring script.
 - `scripts/splice-checkout.py` — re-embeds the above into a fresh export,
   with validation.

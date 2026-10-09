@@ -43,12 +43,10 @@ pasted somewhere else -- so this stays the one source of truth.
 
 VERIFY LIVE, AFTER DEPLOYING (paste into the browser console on rostas.app):
 
-    Array.from(document.querySelectorAll('a.btn,button.btn'))
-      .filter(el => /start free trial|subscribe monthly|subscribe annually/i
-        .test(el.textContent.trim()))
-      .map(el => el.getAttribute('data-rostas-wired'))
+    Array.from(document.querySelectorAll('#pricing a.btn, #pricing button.btn'))
+      .map(el => el.textContent.trim() + ' = ' + el.getAttribute('data-rostas-wired'))
 
-All three should print "1". If any is null, the splice didn't take on the
+All three pricing buttons should end "= 1". If any ends "= null", the splice didn't take on the
 deployed copy even if it looked right locally -- check you deployed the
 OUTPUT file, not the original export.
 """

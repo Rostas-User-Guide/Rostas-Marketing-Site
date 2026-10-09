@@ -12,11 +12,29 @@
   // Matched by exact visible button text -- robust even if you re-export
   // a slightly different design from Claude Design later, as long as the
   // wording stays close to this.
+  //
+  // "join the beta" (added 10 Oct 2026) is the wording on all three pricing
+  // cards while Rostas is in beta. It has no plan, so it ALWAYS opens the
+  // beta message and can never start a checkout, even if BETA_MODE is
+  // switched off while the buttons still carry that wording. It is matched
+  // only inside the pricing section, so the top-menu "Join the beta" button
+  // keeps scrolling to pricing. When signups open, rename the three card
+  // buttons in Claude Design back to the wording below, then flip BETA_MODE.
   var BUTTON_MATCHERS = [
+    { text: "join the beta",     plan: null, pricingOnly: true },
     { text: "start free trial",  plan: "monthly" },
     { text: "subscribe monthly", plan: "monthly" },
     { text: "subscribe annually", plan: "annual" }
   ];
+
+  // True when the element sits inside the pricing section. If the page has
+  // no element with id "pricing" at all (a future export renamed it), this
+  // returns true for everything, so the buttons are still wired rather than
+  // silently left dead.
+  function inPricing(el){
+    var section = document.getElementById("pricing");
+    return !section || section.contains(el);
+  }
 
   function findCandidates(){
     var els = document.querySelectorAll("a.btn, button.btn");
@@ -27,6 +45,7 @@
       var text = (el.textContent || "").trim().toLowerCase();
       for (var j = 0; j < BUTTON_MATCHERS.length; j++){
         if (text === BUTTON_MATCHERS[j].text){
+          if (BUTTON_MATCHERS[j].pricingOnly && !inPricing(el)) break;
           out.push({ el: el, plan: BUTTON_MATCHERS[j].plan });
           break;
         }
@@ -39,7 +58,7 @@
     el.setAttribute("data-rostas-wired", "1");
     el.addEventListener("click", function(e){
       e.preventDefault();
-      if (BETA_MODE){
+      if (BETA_MODE || !plan){
         showBetaModal();
       } else {
         startCheckout(el, plan);
