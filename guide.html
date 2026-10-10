@@ -183,7 +183,7 @@
 
   /* Small size: the instruction, a little video, and the buttons */
   body.in-pip.pip-small h1{ font-size:16px; margin-bottom:6px; }
-  body.in-pip.pip-small .video-wrap{ max-width:220px; margin-bottom:8px; }
+  body.in-pip.pip-small .video-wrap{ margin-bottom:8px; }
   body.in-pip.pip-small .caption{ font-size:13.5px; margin-bottom:10px; }
   body.in-pip.pip-small .step-action{ margin-bottom:10px; }
   body.in-pip.pip-small .next-btn{ font-size:14px; padding:10px 14px; }
@@ -316,7 +316,7 @@
     var h = Math.min(Math.round((w - 28) * 9 / 16) + BIG_EXTRA, maxH);
     return { width: w, height: h };
   }
-  function smallSize(){ return { width: 340, height: 500 }; }
+  function smallSize(){ return { width: 340, height: 580 }; }   // outer size: includes the ~40px title bar
 
   function resizePip(size){
     if (!pipWin) return;
