@@ -295,7 +295,11 @@
   var pipSmall = false;   // which of its two sizes it is at
   var videoDone = false;
 
-  function el(id){ return document.getElementById(id); }
+  // While the guide floats, its elements live in the floating window's
+  // document, not this one, so look there first.
+  function el(id){
+    return (pipWin && pipWin.document.getElementById(id)) || document.getElementById(id);
+  }
   var panel = el('panel');
   var video = el('step-video');
   var nextBtn = el('next-btn');
