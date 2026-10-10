@@ -7,14 +7,22 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
+<!--
+  Floating guide (10 Oct 2026). In Chrome and Edge the guide can float above
+  every other window (Document Picture-in-Picture), so a coordinator never has
+  to arrange windows side by side. It alternates between two sizes: LARGE while
+  a step's video plays (so the mouse is easy to follow), and SMALL while they
+  do the step themselves. Other browsers get the guide in this tab as before,
+  plus a "pop out the video" button where the browser supports it.
+-->
+<style id="guide-styles">
   :root{
     --navy:#1a2e4a;
     --navy-deep:#12233a;
-    --gold:#b8932a;
-    --gold-dark:#96751f;
+    --gold:#8a6d1c;
+    --gold-dark:#6f5716;
+    --gold-light:#b8932a;
     --bg:#f7f9fb;
-    --card:#ffffff;
     --text:#1e2d3d;
     --muted:#5a6a7e;
     --border:#dde4ed;
@@ -31,7 +39,6 @@
     flex-direction:column;
   }
 
-  /* Slim header, matches welcome.html / setup wizard chrome */
   header{
     background:var(--navy);
     padding:0.6rem 1.25rem;
@@ -41,30 +48,13 @@
     flex-shrink:0;
   }
   .wordmark{
-    font-size:11px;
-    font-weight:600;
-    color:rgba(255,255,255,0.55);
-    letter-spacing:0.14em;
-    text-transform:uppercase;
+    font-size:11px; font-weight:600; color:rgba(255,255,255,0.55);
+    letter-spacing:0.14em; text-transform:uppercase;
   }
-  .step-count{
-    font-size:12px;
-    font-weight:500;
-    color:rgba(255,255,255,0.85);
-    font-family:'DM Sans',Arial,sans-serif;
-  }
+  .step-count{ font-size:12px; font-weight:500; color:rgba(255,255,255,0.85); }
 
-  .progress-track{
-    height:4px;
-    background:var(--border);
-    flex-shrink:0;
-  }
-  .progress-fill{
-    height:100%;
-    background:var(--gold);
-    transition:width 0.35s ease;
-    width:0%;
-  }
+  .progress-track{ height:4px; background:var(--border); flex-shrink:0; }
+  .progress-fill{ height:100%; background:var(--gold-light); transition:width 0.35s ease; width:0%; }
 
   main{
     flex:1;
@@ -73,169 +63,188 @@
     padding:28px 20px 40px;
     overflow-y:auto;
   }
+  .column{ width:100%; max-width:640px; }
 
-  .panel{
-    width:100%;
-    max-width:640px;
+  /* Float offer, shown in this tab when the browser supports it */
+  .float-offer{
+    background:#fff;
+    border:1.5px solid var(--gold-light);
+    border-radius:var(--radius);
+    padding:16px 18px;
+    margin-bottom:22px;
   }
+  .float-offer strong{ display:block; color:var(--navy); font-size:15px; margin-bottom:4px; }
+  .float-offer p{ margin:0 0 12px; font-size:14px; line-height:1.55; color:var(--text); }
+  .float-btn{
+    font-family:inherit; font-weight:600; font-size:15px;
+    background:var(--navy); color:#fff; border:none; border-radius:8px;
+    padding:12px 20px; cursor:pointer;
+  }
+  .float-btn:hover{ background:var(--navy-deep); }
+  .float-btn:focus-visible{ outline:2px solid var(--gold-light); outline-offset:2px; }
+
+  /* Shown in this tab while the guide is floating */
+  .floating-note{ text-align:center; padding-top:30px; }
+  .floating-note h1{ text-align:center; }
+  .floating-note p{ font-size:14.5px; color:var(--muted); line-height:1.6; max-width:460px; margin:0 auto 20px; }
 
   .step-label{
-    font-size:11px;
-    letter-spacing:0.12em;
-    text-transform:uppercase;
-    color:var(--gold-dark);
-    font-weight:600;
-    margin-bottom:6px;
+    font-size:11px; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--gold); font-weight:600; margin-bottom:6px;
   }
-
   h1{
-    font-family:'Lora',serif;
-    font-size:23px;
-    line-height:1.3;
-    margin:0 0 14px;
-    color:var(--navy);
-    font-weight:700;
+    font-family:'Lora',serif; font-size:23px; line-height:1.3;
+    margin:0 0 14px; color:var(--navy); font-weight:700;
   }
 
   .video-wrap{
-    background:#000;
-    border-radius:var(--radius);
-    overflow:hidden;
+    background:#000; border-radius:var(--radius); overflow:hidden;
     box-shadow:0 1px 3px rgba(26,46,74,0.08), 0 10px 26px -14px rgba(26,46,74,0.28);
-    margin-bottom:18px;
+    margin-bottom:14px;
   }
-  video{
-    display:block;
-    width:100%;
-    aspect-ratio:16/9;
-    background:#000;
-  }
+  video{ display:block; width:100%; aspect-ratio:16/9; background:#000; }
 
-  .caption{
-    font-size:14.5px;
-    line-height:1.6;
-    color:var(--text);
-    margin:0 0 24px;
-  }
+  .caption{ font-size:14.5px; line-height:1.6; color:var(--text); margin:0 0 16px; }
 
-  .actions{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:14px;
+  .step-action{ margin:0 0 20px; }
+  .step-action a{
+    display:inline-block; font-weight:600; font-size:14.5px;
+    color:#fff; background:var(--gold); text-decoration:none;
+    border-radius:8px; padding:11px 18px;
   }
+  .step-action a:hover{ background:var(--gold-dark); }
 
-  .back-link{
-    font-family:'DM Sans',Arial,sans-serif;
-    font-size:13px;
-    color:var(--muted);
-    background:none;
-    border:none;
-    cursor:pointer;
-    padding:8px 0;
-    visibility:hidden;
+  .actions{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+  .link-btn{
+    font-family:inherit; font-size:13px; color:var(--muted);
+    background:none; border:none; cursor:pointer; padding:8px 0;
   }
-  .back-link:hover{ color:var(--navy); }
+  .link-btn:hover{ color:var(--navy); text-decoration:underline; }
+  .back-link{ visibility:hidden; }
 
   .next-btn{
-    font-family:'DM Sans',Arial,sans-serif;
-    font-weight:600;
-    font-size:15px;
-    background:var(--gold);
-    color:#fff;
-    border:none;
-    border-radius:8px;
-    padding:13px 22px;
-    cursor:pointer;
-    transition:background 0.15s, opacity 0.15s;
+    font-family:inherit; font-weight:600; font-size:15px;
+    background:var(--gold); color:#fff; border:none; border-radius:8px;
+    padding:13px 22px; cursor:pointer; transition:background 0.15s;
   }
   .next-btn:hover{ background:var(--gold-dark); }
-  .next-btn:disabled{
-    background:#c8cfd8;
-    cursor:not-allowed;
-  }
+  .next-btn:disabled{ background:#c8cfd8; cursor:not-allowed; }
   .next-btn:focus-visible{ outline:2px solid var(--navy); outline-offset:2px; }
 
-  .skip-link{
-    display:block;
-    text-align:right;
-    font-family:'DM Sans',Arial,sans-serif;
-    font-size:12px;
-    color:var(--muted);
-    background:none;
-    border:none;
-    cursor:pointer;
-    margin-top:10px;
-    padding:2px 0;
-  }
-  .skip-link:hover{ color:var(--navy); text-decoration:underline; }
+  .skip-link{ display:block; margin-left:auto; margin-top:10px; font-size:12px; }
+
+  .pop-video{ margin:-4px 0 14px; }
 
   /* Final "done" screen */
   .done-wrap{ text-align:center; padding-top:20px; }
   .done-icon{
-    width:52px; height:52px;
-    border-radius:50%;
-    background:#eaf3ee;
-    color:#2d7a4f;
+    width:52px; height:52px; border-radius:50%;
+    background:#eaf3ee; color:#2d7a4f;
     display:flex; align-items:center; justify-content:center;
-    margin:0 auto 18px;
-    font-size:26px;
+    margin:0 auto 18px; font-size:26px;
   }
   .done-wrap h1{ text-align:center; }
-  .done-sub{
-    font-size:14.5px;
-    color:var(--muted);
-    line-height:1.6;
-    max-width:440px;
-    margin:0 auto 26px;
-  }
+  .done-sub{ font-size:14.5px; color:var(--muted); line-height:1.6; max-width:440px; margin:0 auto 26px; }
   .close-btn{
-    font-family:'DM Sans',Arial,sans-serif;
-    font-weight:600;
-    font-size:15px;
-    background:var(--navy);
-    color:#fff;
-    border:none;
-    border-radius:8px;
-    padding:13px 26px;
-    cursor:pointer;
+    font-family:inherit; font-weight:600; font-size:15px;
+    background:var(--navy); color:#fff; border:none; border-radius:8px;
+    padding:13px 26px; cursor:pointer;
   }
   .close-btn:hover{ background:var(--navy-deep); }
-  .hidden{ display:none; }
+  .hidden{ display:none !important; }
+
+  /* ---- Inside the floating window ---- */
+  .pip-only{ display:none; }
+  body.in-pip{ min-height:0; height:auto; overflow-y:auto; }
+  body.in-pip .pip-only{ display:flex; }
+  body.in-pip .tab-only{ display:none !important; }
+  body.in-pip .panel{ padding:0 14px 14px; }
+  .pip-bar{
+    align-items:center; justify-content:space-between; gap:10px;
+    background:var(--navy); color:#fff;
+    margin:0 -14px 12px; padding:8px 14px;
+    font-size:12px; font-weight:500;
+  }
+  .size-btn{
+    font-family:inherit; font-size:12px; font-weight:600;
+    color:#fff; background:rgba(255,255,255,0.14);
+    border:1px solid rgba(255,255,255,0.3); border-radius:6px;
+    padding:5px 10px; cursor:pointer;
+  }
+  .size-btn:hover{ background:rgba(255,255,255,0.24); }
+  body.in-pip h1{ font-size:19px; margin-bottom:10px; }
+  body.in-pip .step-label{ display:none; }
+  body.in-pip .done-wrap{ padding-top:8px; }
+  body.in-pip:not(.pip-small) .caption{ display:none; }   /* large = watch; the words show when small */
+  body.in-pip:not(.pip-small) .step-action{ margin-bottom:12px; }
+  body.in-pip.pip-small .actions{ flex-direction:column; align-items:stretch; gap:4px; }
+  body.in-pip.pip-small #replay-btn{ order:2; text-align:center; }
+  body.in-pip.pip-small #back-btn{ order:3; text-align:center; }
+
+  /* Small size: the instruction, a little video, and the buttons */
+  body.in-pip.pip-small h1{ font-size:16px; margin-bottom:6px; }
+  body.in-pip.pip-small .video-wrap{ max-width:220px; margin-bottom:8px; }
+  body.in-pip.pip-small .caption{ font-size:13.5px; margin-bottom:10px; }
+  body.in-pip.pip-small .step-action{ margin-bottom:10px; }
+  body.in-pip.pip-small .next-btn{ font-size:14px; padding:10px 14px; }
+  body.in-pip .skip-link{ display:none; }
 </style>
 </head>
 <body>
 
-<header>
+<header class="tab-only">
   <span class="wordmark">Rostas Setup Guide</span>
   <span class="step-count" id="step-count">Step 1 of 6</span>
 </header>
-<div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+<div class="progress-track tab-only"><div class="progress-fill" id="progress-fill"></div></div>
 
 <main>
-  <div class="panel">
+  <div class="column" id="column">
 
-    <!-- STEP VIEW -->
-    <div id="step-view">
-      <div class="step-label" id="step-label">Step 1</div>
-      <h1 id="step-title"></h1>
-      <div class="video-wrap">
-        <video id="step-video" controls preload="metadata" playsinline></video>
-      </div>
-      <p class="caption" id="step-caption"></p>
-      <div class="actions">
-        <button class="back-link" id="back-btn" type="button">← Back</button>
-        <button class="next-btn" id="next-btn" type="button" disabled>I've done this — show me the next step</button>
-      </div>
-      <button class="skip-link" id="skip-link" type="button">Already done this? Skip ahead</button>
+    <!-- Offer to float the guide (Chrome and Edge) -->
+    <div id="float-offer" class="float-offer hidden">
+      <strong>Keep the guide on top of your spreadsheet</strong>
+      <p>Click the button and the guide floats above every other window, so you never have to arrange windows. Each video plays large so you can see every click. Then shrink the guide to the corner while you do that step yourself.</p>
+      <button class="float-btn" id="float-btn" type="button">Float the guide on top</button>
     </div>
 
-    <!-- DONE VIEW -->
-    <div id="done-view" class="hidden done-wrap">
-      <div class="done-icon">✓</div>
-      <h1>You're all set</h1>
-      <p class="done-sub">You've made it through the tricky part. Head back to your Rostas Setup Wizard tab to continue — this window can be closed.</p>
-      <button class="close-btn" id="close-btn" type="button">Close this window</button>
+    <!-- Shown here while the guide is floating -->
+    <div id="floating-note" class="floating-note hidden">
+      <h1>The guide is floating on top</h1>
+      <p>Look for the Rostas Setup Guide window on your screen. You can drag it by its top edge, and drag its corner to make it bigger or smaller. Closing it brings the guide back to this tab.</p>
+    </div>
+
+    <div class="panel" id="panel">
+      <div class="pip-bar pip-only">
+        <span id="pip-count">Step 1 of 6</span>
+        <button class="size-btn" id="size-btn" type="button">Make smaller</button>
+      </div>
+
+      <!-- STEP VIEW -->
+      <div id="step-view">
+        <div class="step-label" id="step-label">Step 1</div>
+        <h1 id="step-title"></h1>
+        <div class="video-wrap">
+          <video id="step-video" controls preload="metadata" playsinline></video>
+        </div>
+        <button class="link-btn pop-video tab-only hidden" id="pop-video-btn" type="button">Pop the video out so it stays on top</button>
+        <p class="caption" id="step-caption"></p>
+        <p class="step-action hidden" id="step-action"><a id="step-action-link" href="#" target="_blank" rel="noopener"></a></p>
+        <div class="actions">
+          <button class="link-btn back-link" id="back-btn" type="button">&larr; Back</button>
+          <button class="link-btn hidden" id="replay-btn" type="button">Watch again bigger</button>
+          <button class="next-btn" id="next-btn" type="button" disabled>I've done this &mdash; show me the next step</button>
+        </div>
+        <button class="link-btn skip-link" id="skip-link" type="button">Already done this? Skip ahead</button>
+      </div>
+
+      <!-- DONE VIEW -->
+      <div id="done-view" class="hidden done-wrap">
+        <div class="done-icon">&#10003;</div>
+        <h1>You're all set</h1>
+        <p class="done-sub">You've made it through the tricky part. Carry on in your Rostas Setup Wizard. Your licence key is at the top of your welcome page.</p>
+        <button class="close-btn" id="close-btn" type="button">Close the guide</button>
+      </div>
     </div>
 
   </div>
@@ -243,13 +252,16 @@
 
 <script>
 (function(){
-  // Each entry: id (matches /videos/<id>.mp4), title, short caption.
-  // Captions are brief on-screen summaries — the narration lives in the video audio.
+  var COPY_URL = 'https://docs.google.com/spreadsheets/d/1SHrry71Ge3vA8GgwOG7INz4Wyq1tvyaihaWWsffT12Y/copy';
+
+  // Each entry: id (matches /videos/<id>.mp4), title, short caption, and an
+  // optional button the step needs (opens in the main browser window).
   var STEPS = [
     {
       id: 'clip1',
       title: 'Copy your spreadsheet & open Apps Script',
-      caption: 'Make your own copy of the Rostas spreadsheet, then open the Apps Script editor from the Extensions menu.'
+      caption: 'Make your own copy of the Rostas spreadsheet, then open the Apps Script editor from the Extensions menu.',
+      action: { label: 'Make your copy of Rostas →', href: COPY_URL }
     },
     {
       id: 'clip2',
@@ -259,7 +271,7 @@
     {
       id: 'clip3a',
       title: 'The verification warning',
-      caption: "Google will show an “unverified app” warning. That's completely normal for a small independent tool like Rostas — it's safe to click through."
+      caption: "Google will show an “unverified app” warning. That's normal for a new copy of Rostas, and safe to click through."
     },
     {
       id: 'clip3b',
@@ -269,83 +281,191 @@
     {
       id: 'clip4',
       title: 'Copy your web app URL',
-      caption: "Copy the Web app URL (not the Deployment ID) using the Copy button next to it — worth saving somewhere safe."
+      caption: 'Copy the Web app URL (not the Deployment ID) using the Copy button next to it, and save it somewhere safe.'
     },
     {
       id: 'clip5',
       title: "You're in",
-      caption: 'Paste your Web app URL into a new tab to open your Rostas Setup Wizard, and consider bookmarking it for next time.'
+      caption: 'Paste your Web app URL into a new tab to open your Rostas Setup Wizard, and bookmark it. If Google says “Sorry, unable to open the file”, delete the u/1/ part of the address and press Enter.'
     }
   ];
 
   var current = 0;
+  var pipWin = null;      // the floating window, when open
+  var pipSmall = false;   // which of its two sizes it is at
+  var videoDone = false;
 
-  var stepView = document.getElementById('step-view');
-  var doneView = document.getElementById('done-view');
-  var stepCount = document.getElementById('step-count');
-  var progressFill = document.getElementById('progress-fill');
-  var stepLabel = document.getElementById('step-label');
-  var stepTitle = document.getElementById('step-title');
-  var stepCaption = document.getElementById('step-caption');
-  var video = document.getElementById('step-video');
-  var nextBtn = document.getElementById('next-btn');
-  var backBtn = document.getElementById('back-btn');
-  var skipLink = document.getElementById('skip-link');
-  var closeBtn = document.getElementById('close-btn');
+  function el(id){ return document.getElementById(id); }
+  var panel = el('panel');
+  var video = el('step-video');
+  var nextBtn = el('next-btn');
 
-  function renderStep(i){
+  // ---- Sizes for the floating window -------------------------------------
+  // Large: as wide as fits in 60% of the screen width AND 90% of its height
+  // (a 1366x768 Chromebook gets about 750 wide), with no scrolling needed.
+  var BIG_EXTRA = 260;   // bar, title, step button, next button, padding
+  function bigSize(){
+    var maxH = Math.round(screen.availHeight * 0.9);
+    var w = Math.min(Math.round(screen.availWidth * 0.6), 1100,
+                     Math.round((maxH - BIG_EXTRA) * 16 / 9) + 28);
+    w = Math.max(w, 480);
+    var h = Math.min(Math.round((w - 28) * 9 / 16) + BIG_EXTRA, maxH);
+    return { width: w, height: h };
+  }
+  function smallSize(){ return { width: 340, height: 500 }; }
+
+  function resizePip(size){
+    if (!pipWin) return;
+    try { pipWin.resizeTo(size.width, size.height); } catch (e) { /* the person can drag the corner */ }
+  }
+
+  function setPipSmall(small){
+    pipSmall = small;
+    if (!pipWin) return;
+    pipWin.document.body.classList.toggle('pip-small', small);
+    el('size-btn').textContent = small ? 'Make bigger' : 'Make smaller';
+    resizePip(small ? smallSize() : bigSize());
+    updateButtons();
+  }
+
+  function play(){ var p = video.play(); if (p && p.catch) p.catch(function(){}); }
+
+  // ---- Buttons ----------------------------------------------------------
+  function updateButtons(){
+    var last = current === STEPS.length - 1;
+    var replay = el('replay-btn');
+    if (pipWin && !pipSmall){
+      // Large: watch first, then shrink to do it.
+      nextBtn.textContent = 'Got it — make the guide smaller so I can do it';
+      nextBtn.disabled = false;
+      replay.classList.add('hidden');
+    } else if (pipWin && pipSmall){
+      nextBtn.textContent = last ? "I've done this — finish" : "I've done this — next step";
+      nextBtn.disabled = false;
+      replay.classList.remove('hidden');
+    } else {
+      nextBtn.textContent = last ? "I've done this — finish" : "I've done this — show me the next step";
+      nextBtn.disabled = !videoDone;
+      replay.classList.add('hidden');
+    }
+  }
+
+  function renderStep(i, autoplay){
     current = i;
     var s = STEPS[i];
+    var count = 'Step ' + (i + 1) + ' of ' + STEPS.length;
+    el('step-count').textContent = count;
+    el('pip-count').textContent = count;
+    el('progress-fill').style.width = Math.round(((i + 1) / STEPS.length) * 100) + '%';
+    el('step-label').textContent = 'Step ' + (i + 1);
+    el('step-title').textContent = s.title;
+    el('step-caption').textContent = s.caption;
 
-    stepCount.textContent = 'Step ' + (i + 1) + ' of ' + STEPS.length;
-    progressFill.style.width = Math.round(((i + 1) / STEPS.length) * 100) + '%';
-    stepLabel.textContent = 'Step ' + (i + 1);
-    stepTitle.textContent = s.title;
-    stepCaption.textContent = s.caption;
+    if (s.action){
+      el('step-action-link').textContent = s.action.label;
+      el('step-action-link').href = s.action.href;
+      el('step-action').classList.remove('hidden');
+    } else {
+      el('step-action').classList.add('hidden');
+    }
 
     video.pause();
     video.removeAttribute('src');
     video.load();
     video.src = '/videos/' + s.id + '.mp4';
     video.load();
+    if (autoplay) play();
 
-    nextBtn.disabled = true;
-    nextBtn.textContent = (i === STEPS.length - 1)
-      ? "I've done this — finish"
-      : "I've done this — show me the next step";
+    videoDone = false;
+    el('back-btn').style.visibility = (i === 0) ? 'hidden' : 'visible';
+    updateButtons();
+    if (!pipWin) window.scrollTo(0, 0);
+  }
 
-    backBtn.style.visibility = (i === 0) ? 'hidden' : 'visible';
-
-    window.scrollTo(0, 0);
+  function showDone(){
+    el('step-view').classList.add('hidden');
+    el('done-view').classList.remove('hidden');
+    if (pipWin) setPipSmall(true);
   }
 
   function goNext(){
+    if (pipWin && !pipSmall){ setPipSmall(true); return; }    // large: shrink to do it
     if (current < STEPS.length - 1){
-      renderStep(current + 1);
+      if (pipWin) setPipSmall(false);                        // next video plays large
+      renderStep(current + 1, !!pipWin);
     } else {
-      stepView.classList.add('hidden');
-      doneView.classList.remove('hidden');
+      showDone();
     }
   }
 
-  function goBack(){
-    if (current > 0) renderStep(current - 1);
+  nextBtn.addEventListener('click', goNext);
+  el('back-btn').addEventListener('click', function(){
+    if (current > 0){
+      if (pipWin) setPipSmall(false);
+      renderStep(current - 1, !!pipWin);
+    }
+  });
+  el('replay-btn').addEventListener('click', function(){
+    setPipSmall(false);
+    video.currentTime = 0;
+    play();
+  });
+  el('size-btn').addEventListener('click', function(){ setPipSmall(!pipSmall); });
+  el('skip-link').addEventListener('click', function(){ videoDone = true; updateButtons(); });
+  video.addEventListener('ended', function(){ videoDone = true; updateButtons(); });
+  el('close-btn').addEventListener('click', function(){
+    if (pipWin) { pipWin.close(); } else { window.close(); }
+  });
+
+  // ---- Floating the guide (Chrome and Edge) -----------------------------
+  function copyStyles(toDoc){
+    var nodes = document.querySelectorAll('link[rel="stylesheet"], style');
+    for (var i = 0; i < nodes.length; i++) toDoc.head.appendChild(nodes[i].cloneNode(true));
   }
 
-  video.addEventListener('ended', function(){
-    nextBtn.disabled = false;
-  });
+  function floatGuide(){
+    var size = bigSize();
+    window.documentPictureInPicture.requestWindow({ width: size.width, height: size.height })
+      .then(function(win){
+        pipWin = win;
+        win.document.title = 'Rostas Setup Guide';
+        copyStyles(win.document);
+        win.document.body.classList.add('in-pip');
+        win.document.body.appendChild(panel);
+        pipSmall = false;
+        el('float-offer').classList.add('hidden');
+        el('floating-note').classList.remove('hidden');
+        updateButtons();
+        play();
 
-  nextBtn.addEventListener('click', goNext);
-  backBtn.addEventListener('click', goBack);
-  skipLink.addEventListener('click', function(){
-    nextBtn.disabled = false;
-  });
-  closeBtn.addEventListener('click', function(){
-    window.close();
-  });
+        win.addEventListener('pagehide', function(){
+          // Closed: the guide comes back to this tab, at the same step.
+          pipWin = null;
+          pipSmall = false;
+          el('column').appendChild(panel);
+          el('floating-note').classList.add('hidden');
+          el('float-offer').classList.remove('hidden');
+          videoDone = true;
+          updateButtons();
+        });
+      })
+      .catch(function(){
+        el('float-offer').classList.add('hidden');
+      });
+  }
 
-  renderStep(0);
+  if ('documentPictureInPicture' in window && window.innerWidth >= 700){
+    el('float-offer').classList.remove('hidden');
+    el('float-btn').addEventListener('click', floatGuide);
+  } else if (document.pictureInPictureEnabled && video.requestPictureInPicture){
+    // Safari and others: the video alone can float, and can be resized.
+    el('pop-video-btn').classList.remove('hidden');
+    el('pop-video-btn').addEventListener('click', function(){
+      video.requestPictureInPicture().catch(function(){});
+    });
+  }
+
+  renderStep(0, false);
 })();
 </script>
 

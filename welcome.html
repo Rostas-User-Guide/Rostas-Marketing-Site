@@ -403,7 +403,7 @@
       <div class="big-num">1</div>
       <div class="body">
         <span class="step-title">Open the video guide</span>
-        <p>Six short clips, about six minutes in all. The guide sits on one side of your screen and your spreadsheet on the other, so you can watch and click at the same time.</p>
+        <p id="guide-intro">Six short clips, about six minutes in all. The guide sits on one side of your screen and your spreadsheet on the other, so you can watch and click at the same time.</p>
         <button class="primary-btn" id="open-guide-btn" type="button">Open the video guide</button>
         <a class="primary-btn hidden" id="open-guide-link" href="/guide.html" target="_blank" rel="noopener">Open the video guide</a>
 
@@ -488,6 +488,8 @@
         <li>
           <span class="step-title">Open Rostas</span>
           Open a new browser tab, paste the link and press Enter. The Rostas Setup Wizard starts. Bookmark this page now (Ctrl+D, or Cmd+D on a Mac), because you will open it often.
+          If Google says &ldquo;Sorry, unable to open the file&rdquo;, you are signed in to more than one Google account. Delete the <strong>u/1/</strong> (or u/2/) part of the address and press Enter.
+          Lost the link? Open your sheet, then <strong>Extensions &rarr; Apps Script &rarr; Deploy &rarr; Manage deployments</strong>, and copy the Web app URL again.
         </li>
         <li>
           <span class="step-title">Enter your licence key</span>
@@ -641,6 +643,14 @@
   }
 
   function setupGuide(){
+    if ('documentPictureInPicture' in window && window.innerWidth >= 700){
+      // Chrome and Edge: the guide opens in a new tab and offers to float
+      // on top of every window (10 Oct 2026), so no window arranging.
+      el('guide-intro').textContent = "Six short clips, about six minutes in all. The guide opens in a new tab. Click “Float the guide on top” there and it stays above your spreadsheet: large while you watch each step, small while you do it.";
+      el('open-guide-btn').classList.add('hidden');
+      el('open-guide-link').classList.remove('hidden');
+      return;
+    }
     if (window.innerWidth < DESKTOP_BREAKPOINT){
       // No room for two windows side by side: plain link, steps shown.
       el('open-guide-btn').classList.add('hidden');
