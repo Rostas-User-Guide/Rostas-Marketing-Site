@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Welcome to Rostas</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<!--
+  rostas.app/welcome - where a new subscriber lands straight after paying.
+  The licence Worker sends them here as /welcome?session_id=... and this page
+  asks the Worker for the licence key that goes with that payment.
+
+  Rebuilt 10 Oct 2026 from the 9 and 11 Aug 2026 pages. The key box, the
+  Copy button, the "Make your copy" link, the key lookup and the
+  "put this window on the right, guide opens on the left" routine are from
+  August. New: on a narrow screen or when the pop-up is blocked the guide
+  opens in a new tab; "Make your copy" is always shown; the steps are also
+  written out, with three pictures of Google's warning screens taken from
+  Clips 3a and 3b (scripts: ~/render-scratch/welcome-stills.py).
+  The guide itself is /guide.html with the clips in /videos/.
+
+  (c) 2026 Guy Pilkinton trading as Rostas. All rights reserved.
+-->
+<style>
+  :root{
+    --navy:#1a2e4a;
+    --navy-deep:#12233a;
+    --gold:#b8932a;
+    --gold-dark:#96751f;
+    --gold-pale:#fdf8ee;
+    --green:#2d7a4f;
+    --red-light:#fdecea;
+    --bg:#f7f9fb;
+    --card:#ffffff;
+    --text:#1e2d3d;
+    --muted:#5a6a7e;
+    --border:#dde4ed;
+    --radius:8px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'DM Sans','Helvetica Neue',Arial,sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:32px 20px;
+  }
+  .card{
+    width:100%;
+    max-width:640px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:0 1px 3px rgba(26,46,74,0.06), 0 12px 32px -16px rgba(26,46,74,0.22);
+    padding:40px 36px 36px;
+  }
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--gold-dark);
+    font-weight:600;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:'Lora',serif;
+    font-size:28px;
+    line-height:1.25;
+    margin:0 0 8px;
+    color:var(--navy);
+    font-weight:700;
+  }
+  h2{
+    font-family:'Lora',serif;
+    font-size:21px;
+    line-height:1.3;
+    margin:34px 0 6px;
+    color:var(--navy);
+    font-weight:700;
+  }
+  .sub{
+    color:var(--muted);
+    font-size:16px;
+    line-height:1.55;
+    margin:0 0 26px;
+  }
+  .lead{
+    color:var(--muted);
+    font-size:15px;
+    line-height:1.55;
+    margin:0 0 20px;
+  }
+  .state{ display:none; }
+  .state.active{ display:block; }
+
+  .spinner{
+    width:28px;height:28px;
+    border-radius:50%;
+    border:3px solid var(--border);
+    border-top-color:var(--gold);
+    animation:spin 0.9s linear infinite;
+    margin:8px 0 18px;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .loading-text{ font-size:15px; color:var(--muted); }
+
+  .key-label{
+    font-size:12px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:8px;
+    font-weight:600;
+  }
+  .key-box{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    background:var(--navy-deep);
+    color:#fff;
+    border-radius:8px;
+    padding:16px 18px;
+    margin-bottom:12px;
+  }
+  .key-box code{
+    font-family:'SF Mono','Menlo','Consolas',monospace;
+    font-size:17px;
+    letter-spacing:0.03em;
+    overflow-wrap:anywhere;
+  }
+  .copy-btn{
+    font-family:inherit;
+    background:rgba(255,255,255,0.12);
+    color:#fff;
+    border:1px solid rgba(255,255,255,0.25);
+    border-radius:6px;
+    padding:8px 14px;
+    font-size:14px;
+    cursor:pointer;
+    flex-shrink:0;
+    transition:background 0.15s;
+  }
+  .copy-btn:hover{ background:rgba(255,255,255,0.22); }
+  .copy-btn:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .copy-btn.copied{ background:var(--green); border-color:var(--green); }
+  .key-note{
+    font-size:14px;
+    color:var(--muted);
+    line-height:1.5;
+    margin:0;
+  }
+  a{ color:var(--navy); }
+
+  .steps{
+    margin:0;
+    padding:0;
+    list-style:none;
+    counter-reset:step;
+  }
+  .steps li{
+    counter-increment:step;
+    position:relative;
+    padding:0 0 22px 42px;
+    font-size:15.5px;
+    line-height:1.55;
+  }
+  .steps li:last-child{ padding-bottom:0; }
+  .steps li::before{
+    content:counter(step);
+    position:absolute;
+    left:0; top:0;
+    width:28px; height:28px;
+    border-radius:50%;
+    background:var(--gold-pale);
+    border:1px solid var(--gold);
+    color:var(--navy);
+    font-size:13px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .steps .step-title{
+    display:block;
+    color:var(--navy);
+    font-weight:600;
+    margin-bottom:2px;
+  }
+  .steps strong{ color:var(--navy); }
+
+  .primary-btn{
+    display:inline-block;
+    text-align:center;
+    font-family:inherit;
+    font-weight:600;
+    font-size:15px;
+    background:var(--gold-dark);
+    color:#fff;
+    text-decoration:none;
+    border:none;
+    border-radius:8px;
+    padding:12px 20px;
+    margin:10px 0 8px;
+    cursor:pointer;
+    transition:background 0.15s;
+  }
+  .primary-btn:hover{ background:#7d6119; }
+  .primary-btn:focus-visible{ outline:2px solid var(--navy); outline-offset:2px; }
+
+  .next-box{
+    background:var(--gold-pale);
+    border-left:4px solid var(--gold);
+    border-radius:6px;
+    padding:14px 16px;
+    margin:28px 0 0;
+    font-size:15px;
+    line-height:1.55;
+  }
+  .next-box p{ margin:0 0 6px; }
+  .next-box p:last-child{ margin-bottom:0; }
+
+  .video-wrap{
+    margin-top:14px;
+    background:#000;
+    border-radius:8px;
+    overflow:hidden;
+    aspect-ratio:16 / 9;
+  }
+  .video-wrap video{ width:100%; height:100%; display:block; object-fit:contain; background:#000; }
+
+  .footnote{
+    font-size:14px;
+    color:var(--muted);
+    text-align:center;
+    margin-top:18px;
+    line-height:1.5;
+  }
+  .error-box{
+    background:var(--red-light);
+    border:1px solid #f3c6be;
+    border-radius:8px;
+    padding:16px 18px;
+    font-size:15px;
+    line-height:1.55;
+    margin-bottom:22px;
+  }
+  .retry-btn{
+    font-family:inherit;
+    background:transparent;
+    border:1px solid var(--navy);
+    color:var(--navy);
+    border-radius:8px;
+    padding:11px 16px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    width:100%;
+  }
+  .page-foot{
+    max-width:640px;
+    width:100%;
+    text-align:center;
+    font-size:13px;
+    color:var(--muted);
+    margin-top:22px;
+  }
+  .hidden{ display:none !important; }
+
+  .big-step{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:18px 18px 16px;
+    margin:0 0 14px;
+  }
+  .big-num{
+    flex-shrink:0;
+    width:32px; height:32px;
+    border-radius:50%;
+    background:var(--navy);
+    color:#fff;
+    font-weight:700;
+    font-size:15px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .big-step .step-title{
+    display:block;
+    color:var(--navy);
+    font-weight:600;
+    font-size:17px;
+    margin:3px 0 4px;
+  }
+  .big-step p{ margin:0 0 6px; font-size:15.5px; line-height:1.55; }
+  .big-step .body{ flex:1; min-width:0; }
+
+  .snap-box{
+    background:var(--gold-pale);
+    border:1px solid #ead9a8;
+    border-radius:8px;
+    padding:16px 16px 14px;
+    margin-top:10px;
+  }
+  .snap-graphic{ display:flex; justify-content:center; margin:0 0 10px; }
+  .snap-graphic .mac-controls{ display:none; }
+  .snap-graphic.os-mac .win-controls{ display:none; }
+  .snap-graphic.os-mac .mac-controls{ display:block; }
+  .pulse-ring{ animation:snap-pulse 1.6s ease-out infinite; transform-origin:center; }
+  @keyframes snap-pulse{
+    0%{ opacity:0.9; transform:scale(0.85); }
+    70%{ opacity:0; transform:scale(1.3); }
+    100%{ opacity:0; transform:scale(1.3); }
+  }
+  .snap-fallback{ font-size:14px !important; color:var(--muted); }
+  .ok-note{
+    background:#eaf3ee;
+    border-left:4px solid var(--green);
+    border-radius:6px;
+    padding:10px 14px;
+    margin-top:10px !important;
+  }
+  .plain-link{ font-size:15px; }
+
+  details.written{
+    border:1px solid var(--border);
+    border-radius:8px;
+    margin:18px 0 0;
+    padding:0 18px;
+  }
+  details.written summary{
+    cursor:pointer;
+    padding:14px 0;
+    font-weight:600;
+    font-size:16px;
+    color:var(--navy);
+  }
+  details.written[open]{ padding-bottom:18px; }
+  details.written .steps{ margin-top:6px; }
+  .steps figure{ margin:10px 0 4px; }
+  .steps figure img{
+    display:block;
+    width:100%;
+    max-width:520px;
+    height:auto;
+    border:1px solid var(--border);
+    border-radius:6px;
+  }
+  .steps figcaption{ font-size:14px; color:var(--muted); margin-top:4px; }
+
+  @media (max-width:520px){
+    body{ padding:16px 12px; justify-content:flex-start; }
+    .card{ padding:28px 20px 26px; }
+    h1{ font-size:25px; }
+    .key-box{ flex-direction:column; align-items:stretch; text-align:center; }
+    .primary-btn{ display:block; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .spinner{ animation:none; }
+    .pulse-ring{ animation:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- LOADING -->
+  <div id="state-loading" class="state active">
+    <div class="eyebrow">Rostas</div>
+    <h1>Setting up your account&hellip;</h1>
+    <p class="sub">This only takes a moment. We're confirming your payment details and preparing your licence key.</p>
+    <div class="spinner" aria-hidden="true"></div>
+    <div class="loading-text" id="loading-text">Checking with Stripe&hellip;</div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div id="state-success" class="state">
+    <div class="eyebrow">You're in</div>
+    <h1>Welcome to Rostas</h1>
+    <p class="sub">Thanks for signing up. Here is your licence key, and the steps to get your own copy of Rostas running.</p>
+
+    <div class="key-label">Your licence key</div>
+    <div class="key-box">
+      <code id="licence-key">RSTS-XXXX-XXXX-XXXX</code>
+      <button class="copy-btn" id="copy-btn" type="button">Copy</button>
+    </div>
+    <p class="key-note">Keep this key somewhere safe. You'll need it at the end of set-up. If you lose it, email <a href="mailto:support@rostas.app">support@rostas.app</a>.</p>
+
+    <h2>Set up your copy of Rostas</h2>
+    <p class="lead">Two steps. The video guide shows every click, including Google's warning screens. This is easiest on a computer, not a phone.</p>
+
+    <div class="big-step">
+      <div class="big-num">1</div>
+      <div class="body">
+        <span class="step-title">Open the video guide</span>
+        <p>Six short clips, about six minutes in all. The guide sits on one side of your screen and your spreadsheet on the other, so you can watch and click at the same time.</p>
+        <button class="primary-btn" id="open-guide-btn" type="button">Open the video guide</button>
+        <a class="primary-btn hidden" id="open-guide-link" href="/guide.html" target="_blank" rel="noopener">Open the video guide</a>
+
+        <!-- Shown on a wide screen: put this window on the right, then the guide opens on the left. -->
+        <div id="guide-snap" class="snap-box hidden">
+          <div class="snap-graphic" id="snap-graphic">
+            <svg viewBox="0 0 220 130" width="220" height="130" aria-hidden="true">
+              <rect x="4" y="4" width="212" height="122" rx="8" fill="#ffffff" stroke="#dde4ed" stroke-width="2"></rect>
+              <rect x="4" y="4" width="212" height="24" rx="8" fill="#1a2e4a"></rect>
+              <g class="win-controls">
+                <rect x="176" y="10" width="12" height="12" rx="2" fill="none" stroke="#ffffff" stroke-width="1.4"></rect>
+                <circle class="pulse-ring" cx="182" cy="16" r="14" fill="none" stroke="#b8932a" stroke-width="2"></circle>
+              </g>
+              <g class="mac-controls">
+                <circle cx="16" cy="16" r="6" fill="#2d7a4f"></circle>
+                <circle class="pulse-ring" cx="16" cy="16" r="14" fill="none" stroke="#b8932a" stroke-width="2"></circle>
+              </g>
+            </svg>
+          </div>
+          <p id="snap-instructions"></p>
+          <p class="snap-fallback">Not seeing that menu? Click and hold the very top edge of this window instead, then drag it to the right side of your screen until it snaps into place.</p>
+          <button class="primary-btn" id="snap-confirm-btn" type="button">I've done this &mdash; open the guide</button>
+          <p><a class="plain-link" href="/guide.html" target="_blank" rel="noopener">Or just open the guide in a new tab</a></p>
+        </div>
+
+        <div id="popup-blocked" class="hidden">
+          <div class="error-box" style="margin:10px 0 8px;">Your browser stopped the guide window from opening.</div>
+          <p><a class="primary-btn" href="/guide.html" target="_blank" rel="noopener">Open the guide in a new tab instead</a></p>
+        </div>
+
+        <p id="guide-open-note" class="ok-note hidden">The guide is open on the left side of your screen. Now do step 2 here, then follow the guide.</p>
+      </div>
+    </div>
+
+    <div class="big-step">
+      <div class="big-num">2</div>
+      <div class="body">
+        <span class="step-title">Make your copy of Rostas</span>
+        <p>First sign in to Google with the account your organisation will keep, not a personal one. Your copy belongs to whichever account makes it.</p>
+        <p>Then click the button, and click <strong>Make a copy</strong> when Google asks. Your own private Rostas sheet opens in a new tab. From there, follow the guide.</p>
+        <a class="primary-btn" id="make-copy-btn" href="https://docs.google.com/spreadsheets/d/1SHrry71Ge3vA8GgwOG7INz4Wyq1tvyaihaWWsffT12Y/copy" target="_blank" rel="noopener">Make your copy of Rostas &rarr;</a>
+      </div>
+    </div>
+
+    <details class="written" id="written-steps">
+      <summary>No video? Read the steps instead</summary>
+      <p class="lead" style="margin-bottom:14px;">These are the same steps the clips show, starting once your copy has opened.</p>
+      <ol class="steps">
+        <li>
+          <span class="step-title">Open the script editor</span>
+          In your new sheet, open the <strong>Extensions</strong> menu and choose <strong>Apps Script</strong>. It opens in another tab. You won't need to touch any code.
+        </li>
+        <li>
+          <span class="step-title">Deploy Rostas</span>
+          At the top right, click <strong>Deploy</strong>, then <strong>New deployment</strong>. Click the cog beside &ldquo;Select type&rdquo; and choose <strong>Web app</strong>. Set &ldquo;Execute as&rdquo; to <strong>Me</strong> and &ldquo;Who has access&rdquo; to <strong>Anyone</strong>, then click <strong>Deploy</strong>.
+        </li>
+        <li>
+          <span class="step-title">Get past Google's warning</span>
+          Click the blue <strong>Authorise access</strong> button and choose your Google account. Google then says it &ldquo;hasn't verified this app&rdquo;. That is normal for a new copy of Rostas, and safe to click through. Click the small <strong>Advanced</strong> link at the bottom left.
+          <figure>
+            <img src="/welcome-img/google-warning-advanced.jpg" width="840" height="400" loading="lazy" alt="Google's warning screen, headed Google hasn't verified this app, with the small Advanced link at the bottom left ringed">
+            <figcaption>Click <strong>Advanced</strong>, not Back to safety.</figcaption>
+          </figure>
+          A new line appears underneath. Click <strong>Go to&hellip; (unsafe)</strong>.
+          <figure>
+            <img src="/welcome-img/google-warning-go-to.jpg" width="840" height="540" loading="lazy" alt="The same warning screen after clicking Advanced, with the Go to link at the bottom ringed">
+            <figcaption>The link names your copy and ends in &ldquo;(unsafe)&rdquo;.</figcaption>
+          </figure>
+        </li>
+        <li>
+          <span class="step-title">Choose what to share</span>
+          A sign-in screen appears. Click <strong>Continue</strong>. The next screen lists what your copy of Rostas needs. Tick <strong>Select all</strong> at the top of the list, scroll to the bottom and click <strong>Continue</strong>. If you skip Select all, parts of Rostas will not work later.
+          <figure>
+            <img src="/welcome-img/google-select-all.jpg" width="620" height="630" loading="lazy" alt="Google's list of what Rostas can access, with the Select all tick box at the top ringed">
+            <figcaption>Tick <strong>Select all</strong> before you continue.</figcaption>
+          </figure>
+        </li>
+        <li>
+          <span class="step-title">Copy your Web app URL</span>
+          The deployment window now shows a Deployment ID and, below it, a <strong>Web app URL</strong>. You need the Web app URL. Click the small <strong>Copy</strong> button beside it, not your browser's address bar. Save the link somewhere safe as well.
+        </li>
+        <li>
+          <span class="step-title">Open Rostas</span>
+          Open a new browser tab, paste the link and press Enter. The Rostas Setup Wizard starts. Bookmark this page now (Ctrl+D, or Cmd+D on a Mac), because you will open it often.
+        </li>
+        <li>
+          <span class="step-title">Enter your licence key</span>
+          The wizard's first step asks for it. Paste in the key from the top of this page.
+        </li>
+      </ol>
+    </details>
+
+    <div class="next-box">
+      <p><strong>What comes next.</strong> The Setup Wizard takes you through your organisation's details and a test text. The coordinator guide explains each step: <a href="https://rostas-user-guide.github.io/Rostas-User-Guide/#b-wizard" target="_blank" rel="noopener">The Setup Wizard</a>.</p>
+      <p>Stuck on any step? Email <a href="mailto:support@rostas.app">support@rostas.app</a> and we'll help you through it.</p>
+    </div>
+  </div>
+
+  <!-- NOT READY (still polling past the quick window) -->
+  <div id="state-slow" class="state">
+    <div class="eyebrow">Rostas</div>
+    <h1>Almost there&hellip;</h1>
+    <p class="sub">Your payment details are still being confirmed. This is usually instant, but occasionally takes a little longer.</p>
+    <div class="spinner" aria-hidden="true"></div>
+    <div class="loading-text">Still checking&hellip; this page will update by itself.</div>
+  </div>
+
+  <!-- ERROR -->
+  <div id="state-error" class="state">
+    <div class="eyebrow">Rostas</div>
+    <h1 id="error-title">Something went wrong</h1>
+    <div class="error-box" id="error-message"></div>
+    <button class="retry-btn" id="retry-btn" type="button">Try again</button>
+    <p class="footnote">Still stuck? Email <a href="mailto:support@rostas.app">support@rostas.app</a> and we'll sort it out.</p>
+  </div>
+
+</div>
+
+<div class="page-foot">&copy; 2026 Guy Pilkinton trading as Rostas. All rights reserved.</div>
+
+<script>
+(function(){
+  var WORKER_BASE = "https://rostas-licence.newsletters-432.workers.dev";
+
+  var MAX_CLIENT_ATTEMPTS = 6;   // about 18 seconds in all, on top of the Worker's own short retry
+  var RETRY_DELAY_MS = 3000;
+  var attempt = 0;
+
+  function show(id){
+    var states = document.querySelectorAll('.state');
+    for (var i = 0; i < states.length; i++){
+      states[i].classList.toggle('active', states[i].id === id);
+    }
+  }
+
+  function showError(title, message){
+    document.getElementById('error-title').textContent = title;
+    document.getElementById('error-message').textContent = message;
+    show('state-error');
+  }
+
+  function showSuccess(data){
+    document.getElementById('licence-key').textContent = data.key || '';
+    show('state-success');
+  }
+
+  function setupCopyButton(){
+    var btn = document.getElementById('copy-btn');
+    btn.addEventListener('click', function(){
+      var text = document.getElementById('licence-key').textContent;
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(function(){
+          markCopied(btn);
+        }, function(){
+          fallbackCopy(text, btn);
+        });
+      } else {
+        fallbackCopy(text, btn);
+      }
+    });
+  }
+
+  function fallbackCopy(text, btn){
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    document.body.removeChild(ta);
+    markCopied(btn);
+  }
+
+  function markCopied(btn){
+    var original = btn.textContent;
+    btn.textContent = 'Copied';
+    btn.classList.add('copied');
+    setTimeout(function(){
+      btn.textContent = original;
+      btn.classList.remove('copied');
+    }, 1800);
+  }
+
+  // --- The video guide (from the August 2026 welcome page) ---------------
+  // Wide screen: show how to put this window on the right, then open the
+  // guide in a window on the left half. Narrow screen, or a blocked pop-up:
+  // the guide opens in an ordinary new tab and the written steps are opened.
+
+  var DESKTOP_BREAKPOINT = 1100;
+  var WIN_SNAP_COPY = "Hover your mouse over the square icon in the top-right corner of this browser window \u2014 the one between minimize and close. Don't click, just hold still a moment. A small menu will pop up \u2014 click the right half of the split-screen picture to snap this window to the right side of your screen.";
+  var MAC_SNAP_COPY = "Hover your mouse over the green button in the top-left corner of this browser window \u2014 don't click, just hold still a moment. A small menu will pop up. Choose \u201cTile Window to Right of Screen.\u201d";
+
+  function el(id){ return document.getElementById(id); }
+
+  function detectOS(){
+    var platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || navigator.userAgent || '';
+    platform = platform.toLowerCase();
+    if (platform.indexOf('mac') !== -1) return 'mac';
+    return 'windows'; // also right for ChromeOS, and the safe default
+  }
+
+  function showSnapStep(){
+    el('open-guide-btn').classList.add('hidden');
+    el('popup-blocked').classList.add('hidden');
+    if (detectOS() === 'mac'){
+      el('snap-graphic').classList.add('os-mac');
+      el('snap-instructions').textContent = MAC_SNAP_COPY;
+    } else {
+      el('snap-graphic').classList.remove('os-mac');
+      el('snap-instructions').textContent = WIN_SNAP_COPY;
+    }
+    el('guide-snap').classList.remove('hidden');
+  }
+
+  function openGuideWindow(){
+    var halfWidth = Math.round(window.screen.availWidth / 2);
+    var fullHeight = window.screen.availHeight;
+    var guideWin = window.open(
+      '/guide.html',
+      'rostasGuide',
+      'width=' + halfWidth + ',height=' + fullHeight + ',left=0,top=0'
+    );
+    // A blocked pop-up comes back as nothing, or as a window already closed.
+    setTimeout(function(){
+      el('guide-snap').classList.add('hidden');
+      if (!guideWin || guideWin.closed){
+        el('popup-blocked').classList.remove('hidden');
+        el('written-steps').open = true;
+      } else {
+        el('popup-blocked').classList.add('hidden');
+        el('guide-open-note').classList.remove('hidden');
+      }
+    }, 300);
+  }
+
+  function setupGuide(){
+    if (window.innerWidth < DESKTOP_BREAKPOINT){
+      // No room for two windows side by side: plain link, steps shown.
+      el('open-guide-btn').classList.add('hidden');
+      el('open-guide-link').classList.remove('hidden');
+      el('written-steps').open = true;
+      return;
+    }
+    el('open-guide-btn').addEventListener('click', showSnapStep);
+    el('snap-confirm-btn').addEventListener('click', openGuideWindow);
+  }
+
+  function fetchSessionKey(sessionId){
+    fetch(WORKER_BASE + '/api/session-key?session_id=' + encodeURIComponent(sessionId), {
+      method: 'GET'
+    }).then(function(resp){
+      // A "not ready yet" answer still arrives as JSON.
+      return resp.json().then(function(body){ return { status: resp.status, body: body }; });
+    }).then(function(result){
+      var body = result.body;
+      if (body && body.ok === true){
+        showSuccess(body);
+        return;
+      }
+      if (body && body.reason === 'not_ready_yet'){
+        attempt++;
+        if (attempt >= MAX_CLIENT_ATTEMPTS){
+          showError(
+            "Still confirming your payment",
+            "This is taking longer than usual. Your payment has most likely gone through. Refresh this page in a minute, or email support@rostas.app with the email address you signed up with and we'll send your key."
+          );
+          return;
+        }
+        show('state-slow');
+        setTimeout(function(){ fetchSessionKey(sessionId); }, RETRY_DELAY_MS);
+        return;
+      }
+      if (body && body.reason === 'missing_session_id'){
+        showMissingSession();
+        return;
+      }
+      if (body && body.reason === 'no_customer_on_session'){
+        showError(
+          "We couldn't find your customer record",
+          "Something went wrong linking your payment to an account. Please email support@rostas.app and we'll get this sorted for you."
+        );
+        return;
+      }
+      showError(
+        "Something went wrong",
+        "We couldn't confirm your licence just now. Please try again, or email support@rostas.app if this keeps happening."
+      );
+    }).catch(function(){
+      showError(
+        "Connection problem",
+        "We couldn't reach Rostas licensing just now. Check your connection and try again."
+      );
+    });
+  }
+
+  function showMissingSession(){
+    showError(
+      "This page needs your checkout link",
+      "Your licence key is shown here straight after you sign up. If you have just finished checkout, go back and use the link you were sent on from. If you have lost your key, email support@rostas.app."
+    );
+    document.getElementById('retry-btn').style.display = 'none';
+  }
+
+  function init(){
+    var params = new URLSearchParams(window.location.search);
+    var sessionId = params.get('session_id');
+    setupCopyButton();
+    setupGuide();
+
+    if (!sessionId){
+      showMissingSession();
+      return;
+    }
+
+    show('state-loading');
+    attempt = 0;
+    fetchSessionKey(sessionId);
+
+    document.getElementById('retry-btn').addEventListener('click', function(){
+      attempt = 0;
+      show('state-loading');
+      fetchSessionKey(sessionId);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+
+</body>
+</html>

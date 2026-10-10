@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rostas Setup Guide</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1a2e4a;
+    --navy-deep:#12233a;
+    --gold:#b8932a;
+    --gold-dark:#96751f;
+    --bg:#f7f9fb;
+    --card:#ffffff;
+    --text:#1e2d3d;
+    --muted:#5a6a7e;
+    --border:#dde4ed;
+    --radius:8px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'DM Sans','Helvetica Neue',Arial,sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* Slim header, matches welcome.html / setup wizard chrome */
+  header{
+    background:var(--navy);
+    padding:0.6rem 1.25rem;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-shrink:0;
+  }
+  .wordmark{
+    font-size:11px;
+    font-weight:600;
+    color:rgba(255,255,255,0.55);
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+  }
+  .step-count{
+    font-size:12px;
+    font-weight:500;
+    color:rgba(255,255,255,0.85);
+    font-family:'DM Sans',Arial,sans-serif;
+  }
+
+  .progress-track{
+    height:4px;
+    background:var(--border);
+    flex-shrink:0;
+  }
+  .progress-fill{
+    height:100%;
+    background:var(--gold);
+    transition:width 0.35s ease;
+    width:0%;
+  }
+
+  main{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    padding:28px 20px 40px;
+    overflow-y:auto;
+  }
+
+  .panel{
+    width:100%;
+    max-width:640px;
+  }
+
+  .step-label{
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--gold-dark);
+    font-weight:600;
+    margin-bottom:6px;
+  }
+
+  h1{
+    font-family:'Lora',serif;
+    font-size:23px;
+    line-height:1.3;
+    margin:0 0 14px;
+    color:var(--navy);
+    font-weight:700;
+  }
+
+  .video-wrap{
+    background:#000;
+    border-radius:var(--radius);
+    overflow:hidden;
+    box-shadow:0 1px 3px rgba(26,46,74,0.08), 0 10px 26px -14px rgba(26,46,74,0.28);
+    margin-bottom:18px;
+  }
+  video{
+    display:block;
+    width:100%;
+    aspect-ratio:16/9;
+    background:#000;
+  }
+
+  .caption{
+    font-size:14.5px;
+    line-height:1.6;
+    color:var(--text);
+    margin:0 0 24px;
+  }
+
+  .actions{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+  }
+
+  .back-link{
+    font-family:'DM Sans',Arial,sans-serif;
+    font-size:13px;
+    color:var(--muted);
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:8px 0;
+    visibility:hidden;
+  }
+  .back-link:hover{ color:var(--navy); }
+
+  .next-btn{
+    font-family:'DM Sans',Arial,sans-serif;
+    font-weight:600;
+    font-size:15px;
+    background:var(--gold);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:13px 22px;
+    cursor:pointer;
+    transition:background 0.15s, opacity 0.15s;
+  }
+  .next-btn:hover{ background:var(--gold-dark); }
+  .next-btn:disabled{
+    background:#c8cfd8;
+    cursor:not-allowed;
+  }
+  .next-btn:focus-visible{ outline:2px solid var(--navy); outline-offset:2px; }
+
+  .skip-link{
+    display:block;
+    text-align:right;
+    font-family:'DM Sans',Arial,sans-serif;
+    font-size:12px;
+    color:var(--muted);
+    background:none;
+    border:none;
+    cursor:pointer;
+    margin-top:10px;
+    padding:2px 0;
+  }
+  .skip-link:hover{ color:var(--navy); text-decoration:underline; }
+
+  /* Final "done" screen */
+  .done-wrap{ text-align:center; padding-top:20px; }
+  .done-icon{
+    width:52px; height:52px;
+    border-radius:50%;
+    background:#eaf3ee;
+    color:#2d7a4f;
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 18px;
+    font-size:26px;
+  }
+  .done-wrap h1{ text-align:center; }
+  .done-sub{
+    font-size:14.5px;
+    color:var(--muted);
+    line-height:1.6;
+    max-width:440px;
+    margin:0 auto 26px;
+  }
+  .close-btn{
+    font-family:'DM Sans',Arial,sans-serif;
+    font-weight:600;
+    font-size:15px;
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:13px 26px;
+    cursor:pointer;
+  }
+  .close-btn:hover{ background:var(--navy-deep); }
+  .hidden{ display:none; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="wordmark">Rostas Setup Guide</span>
+  <span class="step-count" id="step-count">Step 1 of 6</span>
+</header>
+<div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+
+<main>
+  <div class="panel">
+
+    <!-- STEP VIEW -->
+    <div id="step-view">
+      <div class="step-label" id="step-label">Step 1</div>
+      <h1 id="step-title"></h1>
+      <div class="video-wrap">
+        <video id="step-video" controls preload="metadata" playsinline></video>
+      </div>
+      <p class="caption" id="step-caption"></p>
+      <div class="actions">
+        <button class="back-link" id="back-btn" type="button">← Back</button>
+        <button class="next-btn" id="next-btn" type="button" disabled>I've done this — show me the next step</button>
+      </div>
+      <button class="skip-link" id="skip-link" type="button">Already done this? Skip ahead</button>
+    </div>
+
+    <!-- DONE VIEW -->
+    <div id="done-view" class="hidden done-wrap">
+      <div class="done-icon">✓</div>
+      <h1>You're all set</h1>
+      <p class="done-sub">You've made it through the tricky part. Head back to your Rostas Setup Wizard tab to continue — this window can be closed.</p>
+      <button class="close-btn" id="close-btn" type="button">Close this window</button>
+    </div>
+
+  </div>
+</main>
+
+<script>
+(function(){
+  // Each entry: id (matches /videos/<id>.mp4), title, short caption.
+  // Captions are brief on-screen summaries — the narration lives in the video audio.
+  var STEPS = [
+    {
+      id: 'clip1',
+      title: 'Copy your spreadsheet & open Apps Script',
+      caption: 'Make your own copy of the Rostas spreadsheet, then open the Apps Script editor from the Extensions menu.'
+    },
+    {
+      id: 'clip2',
+      title: 'Deploy as a web app',
+      caption: 'Start a new deployment and set it to run as you, with access for anyone.'
+    },
+    {
+      id: 'clip3a',
+      title: 'The verification warning',
+      caption: "Google will show an “unverified app” warning. That's completely normal for a small independent tool like Rostas — it's safe to click through."
+    },
+    {
+      id: 'clip3b',
+      title: 'Choosing what to share',
+      caption: 'Click "Select all" so Rostas has everything it needs to run properly, then continue.'
+    },
+    {
+      id: 'clip4',
+      title: 'Copy your web app URL',
+      caption: "Copy the Web app URL (not the Deployment ID) using the Copy button next to it — worth saving somewhere safe."
+    },
+    {
+      id: 'clip5',
+      title: "You're in",
+      caption: 'Paste your Web app URL into a new tab to open your Rostas Setup Wizard, and consider bookmarking it for next time.'
+    }
+  ];
+
+  var current = 0;
+
+  var stepView = document.getElementById('step-view');
+  var doneView = document.getElementById('done-view');
+  var stepCount = document.getElementById('step-count');
+  var progressFill = document.getElementById('progress-fill');
+  var stepLabel = document.getElementById('step-label');
+  var stepTitle = document.getElementById('step-title');
+  var stepCaption = document.getElementById('step-caption');
+  var video = document.getElementById('step-video');
+  var nextBtn = document.getElementById('next-btn');
+  var backBtn = document.getElementById('back-btn');
+  var skipLink = document.getElementById('skip-link');
+  var closeBtn = document.getElementById('close-btn');
+
+  function renderStep(i){
+    current = i;
+    var s = STEPS[i];
+
+    stepCount.textContent = 'Step ' + (i + 1) + ' of ' + STEPS.length;
+    progressFill.style.width = Math.round(((i + 1) / STEPS.length) * 100) + '%';
+    stepLabel.textContent = 'Step ' + (i + 1);
+    stepTitle.textContent = s.title;
+    stepCaption.textContent = s.caption;
+
+    video.pause();
+    video.removeAttribute('src');
+    video.load();
+    video.src = '/videos/' + s.id + '.mp4';
+    video.load();
+
+    nextBtn.disabled = true;
+    nextBtn.textContent = (i === STEPS.length - 1)
+      ? "I've done this — finish"
+      : "I've done this — show me the next step";
+
+    backBtn.style.visibility = (i === 0) ? 'hidden' : 'visible';
+
+    window.scrollTo(0, 0);
+  }
+
+  function goNext(){
+    if (current < STEPS.length - 1){
+      renderStep(current + 1);
+    } else {
+      stepView.classList.add('hidden');
+      doneView.classList.remove('hidden');
+    }
+  }
+
+  function goBack(){
+    if (current > 0) renderStep(current - 1);
+  }
+
+  video.addEventListener('ended', function(){
+    nextBtn.disabled = false;
+  });
+
+  nextBtn.addEventListener('click', goNext);
+  backBtn.addEventListener('click', goBack);
+  skipLink.addEventListener('click', function(){
+    nextBtn.disabled = false;
+  });
+  closeBtn.addEventListener('click', function(){
+    window.close();
+  });
+
+  renderStep(0);
+})();
+</script>
+
+</body>
+</html>
