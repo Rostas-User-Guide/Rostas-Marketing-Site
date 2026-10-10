@@ -176,7 +176,11 @@
   body.in-pip .step-label{ display:none; }
   body.in-pip .done-wrap{ padding-top:8px; }
   body.in-pip:not(.pip-small) .caption{ display:none; }   /* large = watch; the words show when small */
-  body.in-pip:not(.pip-small) .step-action{ margin-bottom:12px; }
+  /* Large: the step's own button and the next button share one row */
+  body.in-pip:not(.pip-small) .btn-row{ display:flex; align-items:center; gap:12px; }
+  body.in-pip:not(.pip-small) .step-action{ margin:0; flex-shrink:0; }
+  body.in-pip:not(.pip-small) .actions{ flex:1; justify-content:flex-end; flex-wrap:nowrap; }
+  body.in-pip:not(.pip-small) .actions .back-link[style*="hidden"]{ display:none; }
   body.in-pip.pip-small .actions{ flex-direction:column; align-items:stretch; gap:4px; }
   body.in-pip.pip-small #replay-btn{ order:2; text-align:center; }
   body.in-pip.pip-small #back-btn{ order:3; text-align:center; }
@@ -229,11 +233,13 @@
         </div>
         <button class="link-btn pop-video tab-only hidden" id="pop-video-btn" type="button">Pop the video out so it stays on top</button>
         <p class="caption" id="step-caption"></p>
+        <div class="btn-row">
         <p class="step-action hidden" id="step-action"><a id="step-action-link" href="#" target="_blank" rel="noopener"></a></p>
         <div class="actions">
           <button class="link-btn back-link" id="back-btn" type="button">&larr; Back</button>
           <button class="link-btn hidden" id="replay-btn" type="button">Watch again bigger</button>
           <button class="next-btn" id="next-btn" type="button" disabled>I've done this &mdash; show me the next step</button>
+        </div>
         </div>
         <button class="link-btn skip-link" id="skip-link" type="button">Already done this? Skip ahead</button>
       </div>
@@ -307,7 +313,7 @@
   // ---- Sizes for the floating window -------------------------------------
   // Large: as wide as fits in 60% of the screen width AND 90% of its height
   // (a 1366x768 Chromebook gets about 750 wide), with no scrolling needed.
-  var BIG_EXTRA = 260;   // bar, title, step button, next button, padding
+  var BIG_EXTRA = 225;   // window title bar, bar, title, one row of buttons, padding
   function bigSize(){
     var maxH = Math.round(screen.availHeight * 0.9);
     var w = Math.min(Math.round(screen.availWidth * 0.6), 1100,
