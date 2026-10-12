@@ -21,6 +21,19 @@ the Action fails loudly and never touches `index.html` — the site keeps
 serving whatever was live before, rather than going out broken. Check the
 failed run's log under the repo's **Actions** tab for what went wrong.
 
+The same step also makes the page readable before it unpacks (added
+12 Oct 2026). A Claude Design export is a small outer page that unpacks the
+real page with a script; until then it carries only a title and
+"Unpacking...". The splice now copies the title, description, sharing tags
+and structured data into the outer page, adds a canonical link and sharing
+picture to both, and adds a plain-text summary (built from the real page's
+own headline, intro and section headings) for readers that don't run
+scripts. Nothing to do by hand: it is rebuilt from each export.
+
+The Action also runs when anything in `scripts/` changes, so a change to
+the popup wording or the splice rebuilds `index.html` from the export
+already here.
+
 **Still verify live after every deploy** — see the "After deploying"
 check below. Automation prevents the *forgetting* failure mode; it
 doesn't replace looking at the real site.
@@ -136,3 +149,10 @@ destination and this script never need to be touched together.
   in the main Rostas project), and automated the splice step itself with
   `.github/workflows/splice-checkout.yml` — so a forgotten manual step
   can't cause a repeat of the above.
+- **12 Oct 2026** — a search for "Rostas" was listing the volunteer app
+  (`mobile.rostas.app`) above this site. Two fixes: the app now sends
+  `X-Robots-Tag: noindex` (in the MobileRostas repo), and
+  `scripts/splice-checkout.py` gained `add_search_tags()` so the outer page
+  carries a description, canonical link, sharing tags, structured data and
+  a plain-text summary before it unpacks. The workflow now also triggers on
+  `scripts/**`.

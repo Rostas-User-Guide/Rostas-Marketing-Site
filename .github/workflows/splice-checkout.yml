@@ -11,11 +11,17 @@ name: Splice checkout script into fresh export
 # does that step for you, every time, and fails loudly (never deploying
 # a broken export) if anything looks wrong.
 
+# It also runs when anything in scripts/ changes (added 12 Oct 2026), so a
+# change to the beta popup wording or to the splice itself rebuilds
+# index.html from the export already in the repository. Before this, such a
+# change sat unused until the next Claude Design export was uploaded.
+
 on:
   push:
     branches: [main]
     paths:
       - 'raw-export.html'
+      - 'scripts/**'
 
 permissions:
   contents: write
