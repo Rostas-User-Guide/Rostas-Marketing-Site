@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Join the Rostas beta</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<!--
+  rostas.app/beta?code=BETA-XXXXXX - sign-up page for invited beta churches
+  (12 Oct 2026). Each church gets its own one-use code. The page sends the
+  code to the licence Worker's /api/checkout, which checks it is a Rostas
+  beta code, then opens Stripe Checkout at NZ$0.00 with no card asked for.
+  After that the church lands on /welcome like any other subscriber.
+
+  (c) 2026 Guy Pilkinton trading as Rostas. All rights reserved.
+-->
+<style>
+  :root{
+    --navy:#1a2e4a; --navy-deep:#12233a; --gold:#b8932a; --gold-dark:#96751f;
+    --gold-pale:#fdf8ee; --green:#2d7a4f; --red:#b3261e; --red-light:#fdecea;
+    --bg:#f7f9fb; --card:#ffffff; --text:#1e2d3d; --muted:#5a6a7e;
+    --border:#dde4ed; --radius:8px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:'DM Sans','Helvetica Neue',Arial,sans-serif;
+    min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; padding:32px 16px;
+  }
+  .card{
+    width:100%; max-width:560px; background:var(--card);
+    border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:0 1px 3px rgba(26,46,74,0.06), 0 12px 32px -16px rgba(26,46,74,0.22);
+    padding:40px 36px 34px;
+  }
+  @media (max-width:480px){ .card{ padding:30px 22px 26px; } }
+  .eyebrow{ font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--gold-dark); font-weight:600; margin-bottom:10px; }
+  h1{ font-family:'Lora',serif; font-size:28px; line-height:1.25; margin:0 0 10px; color:var(--navy); font-weight:700; }
+  p{ font-size:16px; line-height:1.55; margin:0 0 14px; }
+  .muted{ color:var(--muted); }
+  ul{ margin:4px 0 22px; padding-left:20px; }
+  li{ font-size:15px; line-height:1.55; margin:0 0 6px; }
+  label{ display:block; font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:var(--muted); font-weight:600; margin:0 0 8px; }
+  input{
+    width:100%; font:600 18px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:0.06em;
+    padding:12px 14px; border:1px solid var(--border); border-radius:8px; color:var(--navy);
+    text-transform:uppercase; background:#fff;
+  }
+  input:focus{ outline:2px solid var(--gold); outline-offset:1px; border-color:var(--gold); }
+  button{
+    margin-top:18px; width:100%; border:0; border-radius:8px; cursor:pointer;
+    background:var(--gold-dark); color:#fff; font:600 17px 'DM Sans',Arial,sans-serif; padding:15px 18px;
+  }
+  button:hover{ background:#7f6219; }
+  button:disabled{ opacity:0.7; cursor:wait; }
+  .msg{ display:none; margin-top:16px; padding:12px 14px; border-radius:8px; font-size:15px; line-height:1.5; }
+  .msg.show{ display:block; }
+  .msg.err{ background:var(--red-light); color:var(--red); }
+  .small{ font-size:13px; color:var(--muted); margin-top:18px; line-height:1.5; }
+  a{ color:var(--navy); }
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="eyebrow">Rostas beta</div>
+  <h1>Welcome to the Rostas beta</h1>
+  <p class="muted">Thank you for helping us test Rostas. Your church's subscription is free for the whole beta.</p>
+  <ul>
+    <li><strong>No card needed</strong> to start.</li>
+    <li><strong>20 free texts</strong> to get you going. After that, text credits are 12.5c a text, bought when you need them.</li>
+    <li>We'll give you at least <strong>30 days' notice</strong> before the beta ends. You won't be charged for Rostas unless you then choose to subscribe.</li>
+  </ul>
+
+  <form id="beta-form" novalidate>
+    <label for="code">Your beta code</label>
+    <input id="code" name="code" autocomplete="off" spellcheck="false" placeholder="BETA-XXXXXX" maxlength="40">
+    <button id="go" type="submit">Start my free beta &rarr;</button>
+    <div id="msg" class="msg err" role="alert"></div>
+  </form>
+
+  <p class="small">Next you'll see a Stripe page showing NZ$0.00. Enter the email address your church will use for Rostas and click Subscribe. Your licence key and set-up steps come straight after.<br><br>
+  Questions? Email <a href="mailto:support@rostas.app">support@rostas.app</a>. By signing up you agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
+</main>
+
+<script>
+(function(){
+  var WORKER_BASE = "https://rostas-licence.newsletters-432.workers.dev";
+  var form = document.getElementById("beta-form");
+  var input = document.getElementById("code");
+  var btn = document.getElementById("go");
+  var msg = document.getElementById("msg");
+  var MESSAGES = {
+    invalid_code: "That code wasn't recognised. Check it matches the one in your invitation email, or email support@rostas.app.",
+    code_used: "That code has already been used to sign up. If that wasn't you, email support@rostas.app and we'll sort it out.",
+    other: "Something went wrong opening the sign-up page. Please try again in a minute, or email support@rostas.app."
+  };
+
+  try {
+    var c = new URLSearchParams(window.location.search).get("code");
+    if (c) input.value = c.trim().toUpperCase();
+  } catch (e) {}
+
+  function show(text){ msg.textContent = text; msg.className = "msg err show"; }
+
+  form.addEventListener("submit", function(ev){
+    ev.preventDefault();
+    var code = (input.value || "").trim().toUpperCase();
+    if (!code) { show("Please enter the beta code from your invitation email."); input.focus(); return; }
+    msg.className = "msg err";
+    btn.disabled = true;
+    btn.textContent = "Opening sign-up…";
+    fetch(WORKER_BASE + "/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "subscription", plan: "monthly", promoCode: code, cancelUrl: window.location.href })
+    }).then(function(r){ return r.json(); })
+      .then(function(data){
+        if (data && data.ok && data.url) { window.location.href = data.url; return; }
+        show(MESSAGES[data && data.reason] || MESSAGES.other);
+        btn.disabled = false; btn.textContent = "Start my free beta →";
+      })
+      .catch(function(){
+        show(MESSAGES.other);
+        btn.disabled = false; btn.textContent = "Start my free beta →";
+      });
+  });
+})();
+</script>
+</body>
+</html>
