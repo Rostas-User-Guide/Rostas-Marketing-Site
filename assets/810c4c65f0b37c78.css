@@ -712,7 +712,7 @@ section.compact { padding: 70px 0; }
 .video-frame-inner {
   position: relative; aspect-ratio: 16/9; border-radius: 10px;
   background: #000; overflow: hidden;
-  background-image: url("/assets/5a8cfa8934db34b8.png");
+  background-image: url("/assets/06003c805f7063bf.webp");
   background-size: cover; background-position: center;
 }
 .video-frame-inner::after {
