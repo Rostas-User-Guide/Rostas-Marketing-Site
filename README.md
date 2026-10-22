@@ -65,10 +65,13 @@ doesn't replace looking at the real site.
 ### Running it by hand (fallback, or local testing)
 
 ```bash
-python3 scripts/splice-checkout.py raw-export.html index.html
+python3 scripts/splice-checkout.py raw-export.html /tmp/spliced.html
+python3 scripts/prerender.py /tmp/spliced.html .   # needs Playwright + Chromium
+python3 scripts/test_seo.py
 ```
 
-Same script the Action runs. Useful if you want to check the output
+Same scripts the Action runs (penguin has no Playwright, so in practice
+let the Action do the second step: push a branch and check its preview). Useful if you want to check the output
 before pushing, or if the Action itself needs debugging.
 
 ## Why this exists
