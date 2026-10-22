@@ -20,6 +20,8 @@ name: Splice checkout script into fresh export
 # 5.7 MB bundle into plain HTML plus content-named files in assets/ (see
 # README.md "Plain HTML"). It runs on every branch, so a branch push gets a
 # Cloudflare preview of the finished page before it reaches main.
+# Since 23 Oct 2026 it also makes the page faster on phones (WebP pictures,
+# a cut-down icon font, deferred scripts): Pillow and fontTools do that.
 
 on:
   push:
@@ -48,9 +50,9 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install headless Chromium (Playwright)
+      - name: Install headless Chromium (Playwright), Pillow and fontTools
         run: |
-          pip install playwright==1.56.0
+          pip install playwright==1.56.0 pillow==12.3.0 fonttools==4.66.1 brotli==1.1.0
           python -m playwright install --with-deps chromium
 
       - name: Splice checkout script into the fresh export

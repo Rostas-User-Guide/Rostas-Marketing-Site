@@ -119,6 +119,57 @@ class PlainHomePage(unittest.TestCase):
         self.assertNotIn('data-rostas-wired="1"', self.html)
 
 
+class PhoneSpeed(unittest.TestCase):
+    """23 Oct 2026: PageSpeed (phone) scored 57. These fail on the first
+    plain page (PNG screenshots, 500 KB icon font, scripts not deferred)."""
+
+    @classmethod
+    def setUpClass(cls):
+        with open(os.path.join(ROOT, "index.html"), encoding="utf-8") as f:
+            cls.html = f.read()
+        cls.imgs = re.findall(r"<img\b[^>]*>", cls.html)
+
+    def test_pictures_are_webp_with_size(self):
+        self.assertTrue(self.imgs)
+        for tag in self.imgs:
+            self.assertNotIn(".png", tag, tag)
+            self.assertRegex(tag, r'width="\d+" height="\d+"', tag)
+        self.assertNotRegex(self.html, r"/assets/[0-9a-f]{16}\.png")
+
+    def test_lower_pictures_load_lazily(self):
+        fold = self.html.find("</header>")
+        for m in re.finditer(r"<img\b[^>]*>", self.html):
+            self.assertEqual('loading="lazy"' in m.group(0), m.start() > fold, m.group(0))
+
+    def test_big_screenshots_have_phone_copy(self):
+        self.assertGreaterEqual(sum('srcset="' in t for t in self.imgs), 5)
+
+    def test_no_big_pictures_or_fonts(self):
+        for name in os.listdir(os.path.join(ROOT, "assets")):
+            size = os.path.getsize(os.path.join(ROOT, "assets", name))
+            if name.endswith((".webp", ".woff2", ".png")):
+                self.assertLess(size, 200_000, name)
+
+    def test_icon_font_cut_down_and_preloaded(self):
+        m = re.search(r"font-family: 'Material Symbols Rounded';.*?font-display: block;\s*"
+                      r'src: url\("(/assets/[0-9a-f]{16}\.woff2)"\)', self.html, re.S)
+        self.assertTrue(m, "icon font @font-face with font-display: block")
+        self.assertLess(os.path.getsize(os.path.join(ROOT, m.group(1).lstrip("/"))), 60_000)
+        self.assertIn(f'<link rel="preload" href="{m.group(1)}" as="font"', self.html)
+
+    def test_scripts_deferred(self):
+        body = self.html[self.html.find("<body"):]
+        srcs = re.findall(r"<script src=[^>]*>", body)
+        self.assertTrue(srcs)
+        for tag in srcs:
+            self.assertIn(" defer", tag, tag)
+
+    def test_main_landmark(self):
+        self.assertEqual(self.html.count("<main>"), 1)
+        self.assertLess(self.html.find("</nav>"), self.html.find("<main>"))
+        self.assertLess(self.html.find("</main>"), self.html.find('<footer class="foot"'))
+
+
 class StaticFiles(unittest.TestCase):
     def test_assets_cached_long(self):
         with open(os.path.join(ROOT, "_headers"), encoding="utf-8") as f:

@@ -22,12 +22,23 @@ unpack and draw itself, then saves what it drew as ordinary HTML:
 The interactive parts (app demo, roster board, FAQ, pricing buttons) still
 work: their scripts load after the page and take over as before.
 
+PHONE SPEED (23 Oct 2026, after PageSpeed scored the phone page 57)
+  * PNG pictures become WebP, at most 1600 px wide plus an 800 px copy for
+    phones, with width/height set and loading="lazy" below the top section;
+  * the 500 KB icon font is cut down to the icons the page actually uses;
+  * script files get `defer`, so the page draws before they run;
+  * everything between the top menu and the footer is wrapped in <main>.
+The check below also loads the page at phone size and fails if a picture
+is missing or stretched, or an icon shows as its name instead of the icon.
+
 USAGE
 -----
     python3 scripts/prerender.py <spliced.html> <out-dir>
 
-Writes <out-dir>/index.html and <out-dir>/assets/. Needs Playwright:
-    pip install playwright && python3 -m playwright install --with-deps chromium
+Writes <out-dir>/index.html and <out-dir>/assets/. Needs Playwright,
+Pillow and fontTools (same versions as .github/workflows/splice-checkout.yml):
+    pip install playwright==1.56.0 pillow==12.3.0 fonttools==4.66.1 brotli==1.1.0
+    python3 -m playwright install --with-deps chromium
 
 It checks its own result by opening it again in Chromium (no script
 errors, headline present, three pricing buttons wired, demos drawn) and
@@ -232,6 +243,215 @@ def make_plain(html, blobs, assets):
     return html, notes
 
 
+# ── Phone speed (23 Oct 2026) ─────────────────────────────────────────────
+# PageSpeed (phone) scored the first plain page 57: 2 MB of PNG screenshots
+# and a 500 KB icon font competed with the words for a slow connection.
+
+IMG_MAX = 1600            # widest picture kept (the page never shows them wider)
+IMG_SMALL = 800           # extra copy for phones
+WEBP_QUALITY = 82
+ICON_FAMILY = "Material Symbols Rounded"
+ABOVE_FOLD_END = "</header>"   # pictures before this load at once; later ones lazily
+
+
+def _asset_path(assets, url):
+    return os.path.join(assets.dir, url.rsplit("/", 1)[1])
+
+
+def _drop(assets, url):
+    name = url.rsplit("/", 1)[1]
+    os.remove(os.path.join(assets.dir, name))
+    assets.names.pop(name, None)
+
+
+def _rewrite_text_assets(html, assets, old_to_new):
+    """Replace addresses inside the CSS/JS files too. A changed file gets a new
+    content name, so its own address in the page changes as well."""
+    for name in sorted(list(assets.names)):
+        if not name.endswith((".css", ".js")):
+            continue
+        path = os.path.join(assets.dir, name)
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
+        new = text
+        for old, rep in old_to_new.items():
+            new = new.replace(old, rep)
+        if new != text:
+            url = "/" + ASSET_DIR + "/" + name
+            html = html.replace(url, assets.add(new.encode(), ext=name.rsplit(".", 1)[1]))
+            _drop(assets, url)
+    return html
+
+
+def pictures_to_webp(html, assets):
+    """PNG -> WebP (at most 1600 px wide, plus an 800 px copy for phones),
+    width/height on every <img> so nothing jumps while loading, and
+    loading="lazy" for every picture below the top of the page."""
+    from PIL import Image
+    pngs = sorted(set(re.findall(r"/" + ASSET_DIR + r"/[0-9a-f]{16}\.png", html)))
+    for name in assets.names:
+        if name.endswith(".css"):
+            with open(os.path.join(assets.dir, name), encoding="utf-8") as f:
+                pngs = sorted(set(pngs) | set(re.findall(r"/" + ASSET_DIR + r"/[0-9a-f]{16}\.png", f.read())))
+    info, before, after = {}, 0, 0
+    for url in pngs:
+        path = _asset_path(assets, url)
+        before += os.path.getsize(path)
+        im = Image.open(path)
+        im.load()
+        w, h = im.size
+        im = im.convert("RGBA" if im.mode in ("RGBA", "LA", "P") else "RGB")
+
+        def webp(img):
+            from io import BytesIO
+            buf = BytesIO()
+            img.save(buf, "WEBP", quality=WEBP_QUALITY, method=6)
+            return buf.getvalue()
+
+        def scaled(width):
+            return im.resize((width, round(h * width / w)), Image.LANCZOS) if width < w else im
+
+        big_w = min(w, IMG_MAX)
+        big = assets.add(webp(scaled(big_w)), ext="webp")
+        small = assets.add(webp(scaled(IMG_SMALL)), ext="webp") if w > IMG_SMALL * 1.25 else None
+        after += assets.names[big.rsplit("/", 1)[1]] + (assets.names[small.rsplit("/", 1)[1]] if small else 0)
+        info[url] = (big, big_w, small, w, h)
+
+    fold = html.find(ABOVE_FOLD_END)
+
+    def fix_img(m):
+        tag = m.group(0)
+        src = re.search(r'src="([^"]+)"', tag).group(1)
+        if src not in info:
+            return tag
+        big, big_w, small, w, h = info[src]
+        extra = f' width="{w}" height="{h}"'
+        if small:
+            extra += f' srcset="{small} {IMG_SMALL}w, {big} {big_w}w" sizes="(max-width: 900px) 100vw, 900px"'
+        extra += ' decoding="async"' + ('' if m.start() < fold else ' loading="lazy"')
+        tag = tag.replace(f'src="{src}"', f'src="{big}"')
+        tag = re.sub(r'\s(width|height|loading|decoding|srcset|sizes)="[^"]*"', "", tag)
+        return tag[:-1].rstrip("/").rstrip() + extra + ">"
+
+    html = re.sub(r"<img\b[^>]*>", fix_img, html)
+    for url, (big, *_rest) in info.items():   # window.__resources, inline styles
+        html = html.replace(url, big)
+    html = _rewrite_text_assets(html, assets, {u: v[0] for u, v in info.items()})
+    for url in info:
+        _drop(assets, url)
+    return html, f"{len(info)} pictures to WebP: {before // 1024} KB -> {after // 1024} KB"
+
+
+def icon_names_used(html, assets):
+    """Every word in the page or its scripts that could be an icon name."""
+    words = set(re.findall(r"\b[a-z0-9_]{2,40}\b", re.sub(r"<[^>]+>", " ", html)))
+    for name in assets.names:
+        if name.endswith(".js"):
+            with open(os.path.join(assets.dir, name), encoding="utf-8") as f:
+                words |= set(re.findall(r"""["'`]([a-z0-9_]{2,40})["'`]""", f.read()))
+    return words
+
+
+def ligatures(font):
+    """{icon name: glyph name} from the font's ligature table."""
+    rev = {g: chr(c) for c, g in font.getBestCmap().items()}
+    out = {}
+    for lookup in font["GSUB"].table.LookupList.Lookup:
+        for sub in lookup.SubTable:
+            if sub.LookupType == 7:
+                sub = sub.ExtSubTable
+            if getattr(sub, "LookupType", None) != 4:
+                continue
+            for first, ligs in sub.ligatures.items():
+                for lig in ligs:
+                    seq = [first] + list(lig.Component)
+                    if all(g in rev for g in seq):
+                        out["".join(rev[g] for g in seq)] = lig.LigGlyph
+    return out
+
+
+def subset_icon_font(html, assets):
+    """Keep only the icons the page uses (500 KB -> a few KB). Missing an icon
+    would show its name as text, so check() measures every icon on the page."""
+    from fontTools import subset
+    from fontTools.ttLib import TTFont
+    m = re.search(r"font-family: '" + ICON_FAMILY + r"';(.*?)src: url\(\"(/" + ASSET_DIR +
+                  r"/[0-9a-f]{16}\.woff2)\"\) format\('woff2'\);", html, re.S)
+    if not m:
+        raise SystemExit(f"ABORT: could not find the {ICON_FAMILY} font in the page.")
+    url = m.group(2)
+    path = _asset_path(assets, url)
+    font = TTFont(path)
+    ligs = ligatures(font)
+    used = sorted(icon_names_used(html, assets) & set(ligs))
+    if len(used) < 20:
+        raise SystemExit(f"ABORT: only {len(used)} icon names found in the page; expected dozens.")
+    letters = sorted(set("".join(used)))
+    cmap = font.getBestCmap()
+    keep = sorted({ligs[n] for n in used} | {cmap[ord(c)] for c in letters})
+    opts = subset.Options()
+    opts.layout_closure = False      # only the ligatures we keep, not every icon spelt with these letters
+    opts.layout_features = ["*"]
+    opts.flavor = "woff2"
+    opts.notdef_outline = True
+    opts.name_IDs = ["*"]
+    sub = subset.Subsetter(opts)
+    sub.populate(glyphs=keep)
+    sub.subset(font)
+    from io import BytesIO
+    buf = BytesIO()
+    font.flavor = "woff2"
+    font.save(buf)
+    before = os.path.getsize(path)
+    new = assets.add(buf.getvalue(), ext="woff2")
+    # Icon fonts should not "swap": the fallback would show the icon's name.
+    html = html.replace(m.group(0), m.group(0).replace("src: url(", "font-display: block;\n  src: url(", 1), 1)
+    html = html.replace(url, new)
+    _drop(assets, url)
+    preload = f'<link rel="preload" href="{new}" as="font" type="font/woff2" crossorigin>'
+    html = html.replace("</head>", preload + "\n</head>", 1)
+    return html, f"icon font: {len(used)} icons kept, {before // 1024} KB -> {len(buf.getvalue()) // 1024} KB"
+
+
+def scripts_later(html, assets):
+    """defer every script file in <body>: the page draws before they run.
+    They keep their order, and still run before DOMContentLoaded."""
+    body = html.find("<body")
+    head, tail = html[:body], html[body:]
+    first_src = tail.find("<script src=")
+    if any(m.start() > first_src for m in re.finditer(r"<script>", tail)):
+        raise SystemExit("ABORT: an inline script follows a script file; defer would change their order.")
+    tail, n = re.subn(r'<script src="([^"]+)"></script>', r'<script src="\1" defer></script>', tail)
+    # The fonts live in assets/ now, so nothing is fetched from Google Fonts.
+    css = ""
+    for name in assets.names:
+        if name.endswith(".css"):
+            with open(os.path.join(assets.dir, name), encoding="utf-8") as f:
+                css += f.read()
+    if "fonts.gstatic.com" not in css and "fonts.googleapis.com" not in css:
+        head = re.sub(r'<link rel="preconnect" href="https://fonts\.(googleapis|gstatic)\.com"[^>]*>\n?', "", head)
+    return head + tail, f"{n} script files deferred"
+
+
+def add_main_landmark(html, assets):
+    """Wrap everything between the top menu and the footer in <main>, so
+    screen readers can jump straight to the content."""
+    start = html.find("</nav>")
+    end = html.find('<footer class="foot"')
+    if start < 0 or end < 0 or "<main" in html:
+        raise SystemExit("ABORT: could not place <main> (no </nav> or footer, or already there).")
+    start += len("</nav>")
+    return html[:start] + "\n<main>" + html[start:end] + "</main>\n" + html[end:], "<main> landmark added"
+
+
+def speed_up(html, assets):
+    notes = []
+    for step in (pictures_to_webp, subset_icon_font, scripts_later, add_main_landmark):
+        html, note = step(html, assets)
+        notes.append(note)
+    return html, notes
+
+
 def check(out_dir):
     """Open the finished page and confirm it works. Returns a list of problems."""
     srv, base = serve(out_dir)
@@ -256,12 +476,52 @@ def check(out_dir):
                 problems.append(f"only {wired} pricing buttons were wired (expected 3).")
             if page.evaluate("typeof window.Babel") != "undefined":
                 problems.append("Babel is still loaded.")
+            problems += check_phone(browser, base)
             browser.close()
     finally:
         srv.shutdown()
     problems += ["script error: " + e for e in errors[:3]]
     problems += ["missing file: " + u for u in failed[:3]]
     return problems
+
+
+PHONE_CHECK = """async () => {
+  const out = [];
+  for (let y = 0; y < document.body.scrollHeight; y += 600) {   // let lazy pictures load
+    window.scrollTo(0, y); await new Promise(r => setTimeout(r, 60));
+  }
+  await new Promise(r => setTimeout(r, 1500));
+  await document.fonts.ready;
+  for (const img of document.images) {
+    const r = img.getBoundingClientRect();
+    if (!r.width) continue;                                   // hidden (e.g. other tab of a demo)
+    if (!img.complete || !img.naturalWidth) { out.push('picture did not load: ' + img.src); continue; }
+    const want = img.naturalWidth / img.naturalHeight, got = r.width / r.height;
+    const fit = getComputedStyle(img).objectFit;
+    if (fit !== 'contain' && fit !== 'cover' && Math.abs(got - want) / want > 0.03)
+      out.push('picture stretched: ' + img.src + ' ' + got.toFixed(2) + ' vs ' + want.toFixed(2));
+  }
+  for (const el of document.querySelectorAll('.material-symbols-rounded')) {
+    const range = document.createRange(); range.selectNodeContents(el);   // the glyph, not the box
+    const r = range.getBoundingClientRect(), fs = parseFloat(getComputedStyle(el).fontSize);
+    if (r.width > fs * 1.6) out.push('icon shows as text: "' + el.textContent.trim() + '"');
+  }
+  if (!document.querySelector('main')) out.push('no <main> landmark');
+  return out;
+}"""
+
+
+def check_phone(browser, base):
+    """Phone-sized check: every picture loads unstretched, every icon draws."""
+    page = browser.new_page(viewport={"width": 412, "height": 823}, device_scale_factor=1.75,
+                            is_mobile=True, has_touch=True)
+    errors = []
+    page.on("pageerror", lambda e: errors.append("phone script error: " + str(e)))
+    page.goto(base + "index.html", wait_until="load")
+    wait_until_drawn(page)
+    problems = page.evaluate(PHONE_CHECK)
+    page.close()
+    return sorted(set(problems))[:10] + errors[:3]
 
 
 def main():
@@ -273,6 +533,8 @@ def main():
     html, blobs = render(spliced)
     assets = Assets(work)
     html, notes = make_plain(html, blobs, assets)
+    html, more = speed_up(html, assets)
+    notes += more
     with open(os.path.join(work, "index.html"), "w", encoding="utf-8") as f:
         f.write(html)
     # The finished page links to /favicon.ico etc.; copy them so the check
