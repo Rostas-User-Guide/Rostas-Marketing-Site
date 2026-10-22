@@ -11,8 +11,9 @@
   --bg: #f7f9fb;
   --card-bg: #ffffff;
   --card-border: #dde4ed;
-  --gold: #b8932a;
-  --gold-dark: #93741f;
+  --gold: #b8932a;        /* lines and borders only: 2.9:1, too faint for text */
+  --gold-fill: #8a6d1c;   /* gold behind white text (same as the volunteer app's --gold-text) */
+  --gold-dark: #7a5f17;   /* gold text and links: 4.5:1+ on white, --bg and the green callout */
   --nav-link: #c9d8e8;
   --footer-text: #a8bdd4;
   --green: #2f7a4d;
@@ -94,7 +95,7 @@ header.site-header {
 .header-links a:hover { color: #ffffff; }
 .btn {
   display: inline-block;
-  background: var(--gold);
+  background: var(--gold-fill);
   color: #ffffff !important;
   font-weight: 600;
   font-size: 14px;
@@ -146,7 +147,9 @@ main {
   text-decoration: none;
   display: block;
 }
-.guide-grid .card a.card-link:hover h3 { color: var(--gold-dark); }
+/* Guide cards are h2 under the page's h1 (headings in order); they keep the h3 size. */
+.guide-grid .card h2 { font-size: 20px; margin: 0 0 10px; }
+.guide-grid .card a.card-link:hover h2 { color: var(--gold-dark); }
 .guide-grid .card p { color: var(--muted); margin-bottom: 0; }
 
 /* Callouts */

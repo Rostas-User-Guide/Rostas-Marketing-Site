@@ -170,6 +170,95 @@ class PhoneSpeed(unittest.TestCase):
         self.assertLess(self.html.find("</main>"), self.html.find('<footer class="foot"'))
 
 
+def contrast(a, b):
+    """WCAG contrast ratio of two #rrggbb colours."""
+    def lum(c):
+        ch = [int(c[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+        ch = [x / 12.92 if x <= 0.04045 else ((x + 0.055) / 1.055) ** 2.4 for x in ch]
+        return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2]
+    hi, lo = sorted((lum(a), lum(b)), reverse=True)
+    return (hi + 0.05) / (lo + 0.05)
+
+
+def heading_jumps(html):
+    """Headings that skip a level going down (h2 straight to h4), as
+    Lighthouse's heading-order check counts them."""
+    levels = [int(n) for n in re.findall(r"<h([1-6])[\s>]", html)]
+    return [(a, b) for a, b in zip(levels, levels[1:]) if b > a + 1]
+
+
+class Readable(unittest.TestCase):
+    """22 Oct 2026: Lighthouse flagged colour contrast (small gold text and
+    white on gold, 2.7-2.9:1) and heading order (footer h4 after an h2).
+    These fail on the page built before prerender.py's readable_colours."""
+
+    @classmethod
+    def setUpClass(cls):
+        with open(os.path.join(ROOT, "index.html"), encoding="utf-8") as f:
+            cls.html = f.read()
+        m = re.search(r'<style id="readable-colours">(.*?)</style>', cls.html, re.S)
+        cls.css = m.group(1) if m else ""
+
+    def test_readable_style_last_in_head(self):
+        self.assertTrue(self.css, "readable-colours style missing")
+        head = self.html[:self.html.find("</head>")]
+        self.assertGreater(head.find('id="readable-colours"'), head.rfind('<link rel="stylesheet"'))
+
+    def test_gold_text_and_buttons_readable(self):
+        for sel in (".eyebrow", ".cycle-step .num", ".shot-caption .e", ".btn--gold",
+                    ".nav .btn--primary", ".plan-tag"):
+            self.assertIn(sel, self.css, sel)
+        colours = re.findall(r"#[0-9a-f]{6}", self.css)
+        self.assertNotIn("#b8932a", colours)
+        gold_text = re.search(r"\.eyebrow[^{]*\{ color: (#[0-9a-f]{6})", self.css).group(1)
+        for bg in ("#ffffff", "#f7f9fb"):
+            self.assertGreaterEqual(contrast(gold_text, bg), 4.5, bg)
+        fill = re.search(r"\.btn--gold, [^{]*\{ background: (#[0-9a-f]{6})", self.css).group(1)
+        hover = re.search(r"\.btn--gold:hover[^{]*\{ background: (#[0-9a-f]{6})", self.css).group(1)
+        for c in (fill, hover):
+            self.assertGreaterEqual(contrast("#ffffff", c), 4.5, c)
+
+    def test_greys_readable(self):
+        self.assertIn(".trusted-logos > div { opacity: 1; }", self.css)
+        tint = re.search(r"\.chain-cell \.meta \{ color: (#[0-9a-f]{6})", self.css).group(1)
+        self.assertGreaterEqual(contrast(tint, "#d8ecd3"), 4.5)
+        self.assertRegex(self.css, r"max-width: 720px\) \{ \.rbs-overlay[^}]*opacity: 1")
+
+    def test_headings_in_order(self):
+        self.assertEqual(heading_jumps(self.html), [])
+        foot = self.html[self.html.find('<footer class="foot"'):]
+        self.assertNotIn("<h4", foot)
+        self.assertEqual(foot.count("<h3>"), 3)
+        self.assertIn(".foot h3 {", self.css)
+
+    def test_plain_pages_headings_in_order(self):
+        for d in ("", "guides"):
+            for name in os.listdir(os.path.join(ROOT, d) if d else ROOT):
+                if name.endswith(".html") and name not in ("index.html", "raw-export.html") or (d and name == "index.html"):
+                    html = open(os.path.join(ROOT, d, name), encoding="utf-8").read()
+                    self.assertEqual(heading_jumps(html), [], os.path.join(d, name))
+
+    def test_plain_pages_gold_readable(self):
+        css = open(os.path.join(ROOT, "guides", "guides.css"), encoding="utf-8").read()
+        tok = dict(re.findall(r"--([a-z-]+): (#[0-9a-f]{6});", css))
+        for bg in ("#ffffff", tok["bg"], tok["green-bg"]):
+            self.assertGreaterEqual(contrast(tok["gold-dark"], bg), 4.5, "guides link/label on " + bg)
+        self.assertGreaterEqual(contrast("#ffffff", tok["gold-fill"]), 4.5, "guides button")
+        btn = re.search(r"\n\.btn \{[^}]*\}", css).group(0)
+        self.assertIn("background: var(--gold-fill);", btn)
+        for name in ("beta.html", "welcome.html"):
+            html = open(os.path.join(ROOT, name), encoding="utf-8").read()
+            gold = re.search(r"--gold-dark: ?(#[0-9a-f]{6})", html).group(1)
+            self.assertGreaterEqual(contrast(gold, "#ffffff"), 4.5, name)
+
+    def test_checker_kept_with_the_build(self):
+        p = os.path.join(ROOT, "scripts", "vendor", "axe-4.10.3.min.js")
+        self.assertTrue(os.path.exists(p))
+        src = open(os.path.join(ROOT, "scripts", "prerender.py"), encoding="utf-8").read()
+        self.assertIn('accessibility_problems(page, "phone")', src)
+        self.assertIn('accessibility_problems(page, "desktop")', src)
+
+
 class StaticFiles(unittest.TestCase):
     def test_assets_cached_long(self):
         with open(os.path.join(ROOT, "_headers"), encoding="utf-8") as f:

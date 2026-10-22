@@ -70,9 +70,25 @@ python3 scripts/prerender.py /tmp/spliced.html .   # needs Playwright + Chromium
 python3 scripts/test_seo.py
 ```
 
-Same scripts the Action runs (penguin has no Playwright, so in practice
-let the Action do the second step: push a branch and check its preview). Useful if you want to check the output
-before pushing, or if the Action itself needs debugging.
+Same scripts the Action runs. Useful if you want to check the output
+before pushing, or if the Action itself needs debugging. Since 22 Oct 2026
+penguin can run the second step too: the Python packages are installed in
+`~/.venvs/pyw` (not system-wide), so put `export PYTHONPATH=~/.venvs/pyw`
+first and write to a scratch folder, not `.` (the Action builds the
+committed `index.html`).
+
+### Readable colours and heading order (added 22 Oct 2026)
+
+`prerender.py` also adds a small style block (`READABLE_CSS`) that makes
+small gold text and gold buttons the darker gold `#8a6d1c` (the volunteer
+app's rule: bright gold `#b8932a` is for lines and icons only), darkens a
+few greys, and turns the footer's headings into `h3`. Its check then runs
+Lighthouse's own colour-contrast and heading-order checks (axe-core, in
+`scripts/vendor/`) at desktop and phone size; if an export brings a
+problem back, the Action stops and names the element. Change those
+colours in `prerender.py`, not on the Claude Design canvas. The guides,
+beta and welcome pages use the same golds (`guides/guides.css`
+`--gold-fill` / `--gold-dark`).
 
 ## Why this exists
 

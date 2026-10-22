@@ -31,6 +31,14 @@ PHONE SPEED (23 Oct 2026, after PageSpeed scored the phone page 57)
 The check below also loads the page at phone size and fails if a picture
 is missing or stretched, or an icon shows as its name instead of the icon.
 
+READABLE COLOURS (22 Oct 2026, Lighthouse accessibility)
+  * small gold text and gold buttons use the darker gold the volunteer app
+    uses (READABLE_CSS), a few greys are darkened, and the footer headings
+    become h3 so headings go in order;
+  * the check runs Lighthouse's own colour-contrast and heading-order
+    checks (axe-core, kept in scripts/vendor/) at desktop and phone size,
+    so an export that brings a problem back stops here.
+
 USAGE
 -----
     python3 scripts/prerender.py <spliced.html> <out-dir>
@@ -444,12 +452,66 @@ def add_main_landmark(html, assets):
     return html[:start] + "\n<main>" + html[start:end] + "</main>\n" + html[end:], "<main> landmark added"
 
 
+# Readable colours (22 Oct 2026, Lighthouse "colour contrast"). Same rule as
+# the volunteer app (Rules_MobileApp.md, Guy chose the shade on 29 Sep):
+# gold TEXT, and any gold fill behind white text, is GOLD_TEXT; the bright
+# --gold (#b8932a, 2.9:1 on white) stays for lines, icons and gold on navy.
+# Only the elements that failed are named, so gold on the dark sections and
+# the footer (already readable) is untouched. Change colours here, not on
+# the Claude Design canvas: this runs on every export.
+GOLD_TEXT = "#8a6d1c"         # 4.9:1 on white, 4.65:1 on --bg
+GOLD_TEXT_HOVER = "#6f5816"
+MUTED_ON_TINT = "#4a5869"     # 5.8:1 on the demo's pale green
+READABLE_CSS = f"""<style id="readable-colours">
+/* Added by scripts/prerender.py (readable_colours). Do not edit index.html by hand. */
+.eyebrow, .cycle-step .num, .shot-caption .e, .shots-grid--3 .shot-caption .e {{ color: {GOLD_TEXT}; }}
+.btn--gold, .nav .btn--primary, .plan-tag {{ background: {GOLD_TEXT}; }}
+.btn--gold:hover, .nav .btn--primary:hover {{ background: {GOLD_TEXT_HOVER}; }}
+.trusted-logos > div {{ opacity: 1; }}
+.chain-cell .role, .chain-cell .meta {{ color: {MUTED_ON_TINT}; }}
+@media (max-width: 720px) {{ .rbs-overlay, .rbs-frame:hover .rbs-overlay {{ opacity: 1; }} }}
+.foot h3 {{ font-family: inherit; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--gold); font-weight: 700; margin: 0 0 14px; }}
+</style>"""
+
+
+def readable_colours(html, assets):
+    """Lighthouse accessibility fixes: readable colours (READABLE_CSS, last
+    in <head> so it wins) and footer headings h4 -> h3, since the footer
+    follows an h2 (same look: .foot h3 copies .foot h4)."""
+    if 'id="readable-colours"' in html:
+        raise SystemExit("ABORT: readable-colours style already present.")
+    html = html.replace("</head>", READABLE_CSS + "\n</head>", 1)
+    start = html.find('<footer class="foot"')
+    if start < 0:
+        raise SystemExit("ABORT: no footer found for the heading fix.")
+    foot, n = re.subn(r"<h4>(.*?)</h4>", r"<h3>\1</h3>", html[start:])
+    html = html[:start] + foot
+    return html, f"readable colours added; {n} footer headings h4 -> h3"
+
+
 def speed_up(html, assets):
     notes = []
-    for step in (pictures_to_webp, subset_icon_font, scripts_later, add_main_landmark):
+    for step in (pictures_to_webp, subset_icon_font, scripts_later, add_main_landmark, readable_colours):
         html, note = step(html, assets)
         notes.append(note)
     return html, notes
+
+
+AXE = os.path.join(VENDOR, "axe-4.10.3.min.js")   # the checker Lighthouse uses
+AXE_RULES = ["color-contrast", "heading-order"]
+
+
+def accessibility_problems(page, size):
+    """Run Lighthouse's colour-contrast and heading-order checks (axe-core)
+    on an open page that has already been scrolled through."""
+    page.add_script_tag(path=AXE)
+    found = page.evaluate("""async (rules) => {
+        const r = await axe.run(document, {runOnly: {type: 'rule', values: rules}});
+        return r.violations.flatMap(v => v.nodes.map(n =>
+            v.id + ': ' + n.target.join(' ') + ' -- ' + ((n.any[0] || {}).message || '').slice(0, 120)));
+    }""", AXE_RULES)
+    return [f"{size}: {f}" for f in found]
 
 
 def check(out_dir):
@@ -476,6 +538,8 @@ def check(out_dir):
                 problems.append(f"only {wired} pricing buttons were wired (expected 3).")
             if page.evaluate("typeof window.Babel") != "undefined":
                 problems.append("Babel is still loaded.")
+            page.evaluate(SCROLL_THROUGH)          # let fade-in sections finish
+            problems += accessibility_problems(page, "desktop")
             problems += check_phone(browser, base)
             browser.close()
     finally:
@@ -483,6 +547,15 @@ def check(out_dir):
     problems += ["script error: " + e for e in errors[:3]]
     problems += ["missing file: " + u for u in failed[:3]]
     return problems
+
+
+SCROLL_THROUGH = """async () => {
+  for (let y = 0; y < document.body.scrollHeight; y += 400) {
+    window.scrollTo(0, y); await new Promise(r => setTimeout(r, 60));
+  }
+  window.scrollTo(0, 0);
+  await new Promise(r => setTimeout(r, 1500));
+}"""
 
 
 PHONE_CHECK = """async () => {
@@ -520,6 +593,7 @@ def check_phone(browser, base):
     page.goto(base + "index.html", wait_until="load")
     wait_until_drawn(page)
     problems = page.evaluate(PHONE_CHECK)
+    problems += accessibility_problems(page, "phone")
     page.close()
     return sorted(set(problems))[:10] + errors[:3]
 
