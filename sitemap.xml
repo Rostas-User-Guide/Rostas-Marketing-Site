@@ -36,6 +36,21 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://rostas.app/guides/recruiting-volunteers</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://rostas.app/guides/working-bee-event-roster</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://rostas.app/guides/sports-club-roster</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://rostas.app/privacy</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>

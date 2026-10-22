@@ -281,7 +281,9 @@ class StaticFiles(unittest.TestCase):
         pages = ["privacy.html", "terms.html", "welcome.html", "beta.html", "guide.html",
                  "404.html", "guides/index.html", "guides/volunteer-roster-template.html",
                  "guides/no-show-replacement-guide.html", "guides/church-volunteer-roster.html",
-                 "guides/volunteer-reminder-templates.html", "guides/prevent-volunteer-burnout.html"]
+                 "guides/volunteer-reminder-templates.html", "guides/prevent-volunteer-burnout.html",
+                 "guides/recruiting-volunteers.html", "guides/working-bee-event-roster.html",
+                 "guides/sports-club-roster.html"]
         for name in pages:
             self.assertIn('href="/favicon.ico"', open(os.path.join(ROOT, name),
                                                       encoding="utf-8").read(), name)
@@ -290,8 +292,9 @@ class StaticFiles(unittest.TestCase):
 class Guides(unittest.TestCase):
     """Every guide page is listed on /guides/ and in sitemap.xml, has its own
     canonical address and description, and links only to pages that exist
-    (23 Oct 2026: three new guides)."""
-    NEW = ("church-volunteer-roster", "volunteer-reminder-templates", "prevent-volunteer-burnout")
+    (23 Oct 2026: three new guides; 22 Oct evening: three more)."""
+    NEW = ("church-volunteer-roster", "volunteer-reminder-templates", "prevent-volunteer-burnout",
+           "recruiting-volunteers", "working-bee-event-roster", "sports-club-roster")
 
     @classmethod
     def setUpClass(cls):
