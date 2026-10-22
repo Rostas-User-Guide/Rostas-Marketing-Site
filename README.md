@@ -156,3 +156,14 @@ destination and this script never need to be touched together.
   carries a description, canonical link, sharing tags, structured data and
   a plain-text summary before it unpacks. The workflow now also triggers on
   `scripts/**`.
+- **22 Oct 2026** — SEO quick fixes (`Handover_SEOReview_22Oct2026.md` in
+  knox-gas-mirror). `404.html` added (before it, every unknown address
+  returned the home page with 200). Site icon files `favicon.ico`,
+  `favicon.png`, `apple-touch-icon.png` (from the logo packed in the
+  export) and an icon link on every page. `splice-checkout.py` gained
+  `apply_seo_overrides()`: it sets the search title (`SEO_TITLE`),
+  `twitter:card` summary_large_image and the real prices in the structured
+  data (`SEO_OFFERS`) on every export, whatever Claude Design wrote, so
+  **change the title or prices there, not on the canvas.** If prices
+  change, update `SEO_OFFERS` along with `terms.html`.
+  Test: `python3 scripts/test_seo.py`.

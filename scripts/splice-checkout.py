@@ -184,6 +184,128 @@ def _encode_for_template(snippet):
     return json.dumps(snippet, ensure_ascii=False)[1:-1].replace("</", "<\\u002F")
 
 
+# ---- Search wording and pricing (added 22 Oct 2026, SEO review) ----
+# These live here, not in Claude Design, so every new export gets them
+# without anyone remembering to set them on the canvas. They are applied to
+# the real page's <head> inside the template; add_search_tags() then copies
+# them into the outer page as before.
+SEO_TITLE = "Rostas — Church Volunteer Roster Software for NZ & Australia"
+ICON_LINKS = [
+    '<link rel="icon" href="/favicon.ico" sizes="any">',
+    '<link rel="icon" type="image/png" href="/favicon.png">',
+    '<link rel="apple-touch-icon" href="/apple-touch-icon.png">',
+]
+# Real pricing (terms.html section on price): 30-day free trial, then
+# NZ$30 a month or NZ$299 a year; AU$30 / AU$299 in Australia.
+SEO_OFFERS = [
+    {"@type": "Offer", "name": name, "price": price, "priceCurrency": cur,
+     "description": "30-day free trial, then " + label,
+     "priceSpecification": {"@type": "UnitPriceSpecification", "price": price,
+                            "priceCurrency": cur, "unitCode": unit}}
+    for name, price, cur, unit, label in (
+        ("Monthly (New Zealand)", "30", "NZD", "MON", "NZ$30 a month"),
+        ("Yearly (New Zealand)", "299", "NZD", "ANN", "NZ$299 a year"),
+        ("Monthly (Australia)", "30", "AUD", "MON", "AU$30 a month"),
+        ("Yearly (Australia)", "299", "AUD", "ANN", "AU$299 a year"),
+    )
+]
+
+
+def apply_seo_overrides(data):
+    """Set the title, Twitter card and JSON-LD pricing in the real page's
+    <head>. Works on the escaped template text with targeted replacements
+    (never re-encodes the whole template). Returns (new_data, notes, problem).
+    """
+    m = re.search(TEMPLATE_RE, data, re.S)
+    if not m:
+        return data, [], "could not find the __bundler/template script tag."
+    raw = m.group(1)
+    try:
+        page = json.loads(raw)
+    except json.JSONDecodeError as e:
+        return data, [], f"the embedded template is not valid JSON ({e})."
+    head_m = re.search(r"<head[^>]*>(.*?)</head>", page, re.S)
+    if not head_m:
+        return data, [], "the real page has no <head>."
+    head = head_m.group(1)
+    notes = []
+
+    def swap(raw, old, new, what):
+        enc_old, enc_new = _encode_for_template(old), _encode_for_template(new)
+        n = raw.count(enc_old)
+        if n != 1:
+            return raw, f"expected {what} exactly once in the template, found {n}."
+        return raw.replace(enc_old, enc_new), None
+
+    e = html.escape
+    edits = []
+    title_m = re.search(r"<title>.*?</title>", head, re.S)
+    if not title_m:
+        return data, [], "the real page has no <title>."
+    edits.append((title_m.group(0), "<title>" + e(SEO_TITLE) + "</title>", "the <title>"))
+    og_m = re.search(r'<meta property="og:title"[^>]*>', head)
+    if og_m:
+        edits.append((og_m.group(0),
+                      f'<meta property="og:title" content="{e(SEO_TITLE)}">',
+                      "og:title"))
+    tw_m = re.search(r'<meta name="twitter:card"[^>]*>', head)
+    twitter = ['<meta name="twitter:card" content="summary_large_image">']
+    if 'name="twitter:title"' not in head:
+        twitter.append(f'<meta name="twitter:title" content="{e(SEO_TITLE)}">')
+    if 'name="twitter:image"' not in head:
+        twitter.append(f'<meta name="twitter:image" content="{SHARE_IMAGE}">')
+    if tw_m:
+        edits.append((tw_m.group(0), "\n".join(twitter), "twitter:card"))
+    ld_m = re.search(r'(<script type="application/ld\+json">\s*)(.*?)(\s*</script>)',
+                     head, re.S)
+    if ld_m:
+        try:
+            ld = json.loads(ld_m.group(2))
+        except json.JSONDecodeError as ex:
+            return data, [], f"the page's structured data is not valid JSON ({ex})."
+        ld["offers"] = SEO_OFFERS
+        edits.append((ld_m.group(0),
+                      ld_m.group(1) + json.dumps(ld, ensure_ascii=False,
+                                                 separators=(",", ":"))
+                      + ld_m.group(3),
+                      "the structured data"))
+
+    for old, new, what in edits:
+        raw, problem = swap(raw, old, new, what)
+        if problem:
+            return data, [], problem
+        notes.append(what)
+
+    # Anything missing from this export is added before </head>.
+    missing = []
+    if not og_m:
+        missing.append(f'<meta property="og:title" content="{e(SEO_TITLE)}">')
+    if not tw_m:
+        missing.extend(twitter)
+    if not ld_m:
+        desc_m = re.search(r'<meta name="description" content="([^"]*)"', head)
+        ld = {"@context": "https://schema.org", "@type": "SoftwareApplication",
+              "name": "Rostas", "applicationCategory": "BusinessApplication",
+              "operatingSystem": "Web, Android, iOS",
+              "description": html.unescape(desc_m.group(1)) if desc_m else "",
+              "offers": SEO_OFFERS}
+        missing.append('<script type="application/ld+json">'
+                       + json.dumps(ld, ensure_ascii=False, separators=(",", ":"))
+                       + "</script>")
+    if missing:
+        close = "<\\u002Fhead>"
+        if raw.count(close) != 1:
+            return data, [], f"expected exactly one {close!r} in the template."
+        raw = raw.replace(close, _encode_for_template("\n".join(missing) + "\n") + close)
+        notes.append(f"added {len(missing)} missing tag(s)")
+
+    try:
+        json.loads(raw)
+    except json.JSONDecodeError as ex:
+        return data, [], f"the template stopped being valid JSON ({ex})."
+    return data[:m.start(1)] + raw + data[m.end(1):], notes, None
+
+
 def add_search_tags(data):
     """Return (new_data, summary_lines, problem). problem is None on success."""
     if SEARCH_TAGS_MARK in data or SUMMARY_ID in data:
@@ -253,6 +375,10 @@ def add_search_tags(data):
     for block in re.findall(r'<script type="application/ld\+json">.*?</script>',
                             page_head, re.S):
         copied.append(re.sub(r"\s*\n\s*", "", block))
+    # Site icon (22 Oct 2026): the real page's icon is a packed file that
+    # only exists after unpacking, so search results and /favicon.ico had
+    # none. The icon files sit in the repo root.
+    copied.extend(ICON_LINKS)
     head_block = ("\n  " + SEARCH_TAGS_MARK + "\n  "
                   + "\n  ".join(copied) + "\n  <!-- /rostas:search-tags -->")
 
@@ -329,6 +455,16 @@ def check_search_tags(data):
             return f"the outer page's <head> should carry {label} exactly once."
     if outer.count('id="' + SUMMARY_ID + '"') != 1:
         return "the plain-text summary is missing from the outer page."
+    # 22 Oct 2026 SEO review: title, large sharing card, real prices, icon.
+    for needle, label in (("<title>" + html.escape(SEO_TITLE) + "</title>", "the search title"),
+                          ('<meta name="twitter:card" content="summary_large_image">',
+                           "the large Twitter card"),
+                          ('"priceCurrency":"NZD","unitCode":"MON"', "the real prices"),
+                          ('href="/favicon.ico"', "the site icon")):
+        if outer_head.count(needle) != 1:
+            return f"the outer page's <head> should carry {label} exactly once."
+    if '"price":"0"' in outer_head:
+        return "the structured data still gives a price of 0."
     m = re.search(TEMPLATE_RE, data, re.S)
     page = json.loads(m.group(1))
     page_head = re.search(r"<head[^>]*>(.*?)</head>", page, re.S).group(1)
@@ -405,7 +541,12 @@ def main():
     # ---- Make the page readable before it unpacks (added 12 Oct 2026) ----
     # See add_search_tags() above. Done before the template is validated
     # below, so that validation covers the finished file.
+    new_data, seo_notes, seo_problem = apply_seo_overrides(new_data)
+    if seo_problem:
+        print(f"ABORT: search wording: {seo_problem} Nothing written.")
+        sys.exit(1)
     new_data, tag_notes, tag_problem = add_search_tags(new_data)
+    tag_notes.insert(0, "real page <head>: set " + ", ".join(seo_notes))
     if tag_problem:
         print(f"ABORT: search tags: {tag_problem} Nothing written.")
         sys.exit(1)
