@@ -191,10 +191,49 @@ class StaticFiles(unittest.TestCase):
     def test_plain_pages_link_icon(self):
         pages = ["privacy.html", "terms.html", "welcome.html", "beta.html", "guide.html",
                  "404.html", "guides/index.html", "guides/volunteer-roster-template.html",
-                 "guides/no-show-replacement-guide.html"]
+                 "guides/no-show-replacement-guide.html", "guides/church-volunteer-roster.html",
+                 "guides/volunteer-reminder-templates.html", "guides/prevent-volunteer-burnout.html"]
         for name in pages:
             self.assertIn('href="/favicon.ico"', open(os.path.join(ROOT, name),
                                                       encoding="utf-8").read(), name)
+
+
+class Guides(unittest.TestCase):
+    """Every guide page is listed on /guides/ and in sitemap.xml, has its own
+    canonical address and description, and links only to pages that exist
+    (23 Oct 2026: three new guides)."""
+    NEW = ("church-volunteer-roster", "volunteer-reminder-templates", "prevent-volunteer-burnout")
+
+    @classmethod
+    def setUpClass(cls):
+        d = os.path.join(ROOT, "guides")
+        cls.slugs = sorted(f[:-5] for f in os.listdir(d) if f.endswith(".html") and f != "index.html")
+        cls.index = open(os.path.join(d, "index.html"), encoding="utf-8").read()
+        cls.sitemap = open(os.path.join(ROOT, "sitemap.xml"), encoding="utf-8").read()
+
+    def test_new_guides_exist(self):
+        for slug in self.NEW:
+            self.assertIn(slug, self.slugs)
+
+    def test_listed_and_in_sitemap(self):
+        for slug in self.slugs:
+            self.assertIn(f'href="/guides/{slug}"', self.index, slug)
+            self.assertIn(f"<loc>https://rostas.app/guides/{slug}</loc>", self.sitemap, slug)
+
+    def test_head_tags(self):
+        for slug in self.slugs:
+            html = open(os.path.join(ROOT, "guides", slug + ".html"), encoding="utf-8").read()
+            self.assertIn(f'<link rel="canonical" href="https://rostas.app/guides/{slug}">', html)
+            self.assertEqual(html.count('<meta name="description"'), 1, slug)
+            title = re.search(r"<title>(.*?)</title>", html).group(1).replace("&amp;", "&")
+            self.assertLessEqual(len(title), 70, slug)
+            self.assertEqual(len(re.findall(r"<h1[ >]", html)), 1, slug)
+
+    def test_internal_links_exist(self):
+        for slug in self.slugs + ["index"]:
+            html = open(os.path.join(ROOT, "guides", slug + ".html"), encoding="utf-8").read()
+            for href in re.findall(r'href="(/guides/[a-z0-9-]+)"', html):
+                self.assertTrue(os.path.exists(os.path.join(ROOT, href.lstrip("/") + ".html")), f"{slug}: {href}")
 
 
 if __name__ == "__main__":
