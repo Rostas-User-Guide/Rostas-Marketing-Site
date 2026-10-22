@@ -67,7 +67,65 @@ class HomePage(unittest.TestCase):
         self.assertIn("data-rostas-wired", self.data)
 
 
+class PlainHomePage(unittest.TestCase):
+    """The deployed index.html is plain HTML (scripts/prerender.py), not the
+    5.7 MB bundle. Runs against the index.html in the repo, so it passes only
+    after the Action (or prerender.py by hand) has rebuilt it."""
+
+    @classmethod
+    def setUpClass(cls):
+        with open(os.path.join(ROOT, "index.html"), encoding="utf-8") as f:
+            cls.html = f.read()
+        cls.head = cls.html.split("</head>")[0]
+        body = cls.html[cls.html.find("<body"):]
+        cls.text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ",
+                          re.sub(r"<(script|style)[^>]*>.*?</\1>", "", body, flags=re.S)))
+
+    def test_small_and_unbundled(self):
+        self.assertLess(len(self.html.encode()), 250_000)
+        self.assertNotIn("__bundler", self.html)
+        self.assertNotIn('type="text/babel"', self.html)
+
+    def test_words_are_plain_html(self):
+        for words in ("Automated rostering", "Pricing", "Join the beta"):
+            self.assertIn(words, self.text)
+        self.assertGreater(len(self.text), 8000)
+
+    def test_search_tags_in_head(self):
+        for needle in ('<link rel="canonical" href="https://rostas.app/">',
+                       '<meta name="description" content="',
+                       '<meta name="twitter:card" content="summary_large_image">',
+                       '"priceCurrency":"NZD","unitCode":"MON"',
+                       'href="/favicon.ico"',
+                       "<title>Rostas — Church Volunteer Roster Software"):
+            self.assertEqual(self.head.count(needle), 1, needle)
+
+    def test_every_asset_exists(self):
+        refs = set(re.findall(r'/assets/[0-9a-f]{16}\.\w+', self.html))
+        self.assertTrue(refs)
+        css = [r for r in refs if r.endswith(".css")]
+        for r in css:   # fonts and pictures named inside the stylesheets
+            with open(os.path.join(ROOT, r.lstrip("/")), encoding="utf-8") as f:
+                refs |= set(re.findall(r'/assets/[0-9a-f]{16}\.\w+', f.read()))
+        for r in refs:
+            self.assertTrue(os.path.exists(os.path.join(ROOT, r.lstrip("/"))), r)
+
+    def test_checkout_script_present_and_unwired(self):
+        code = self.html
+        for r in set(re.findall(r'<script src="(/assets/[0-9a-f]{16}\.js)"', self.html)):
+            with open(os.path.join(ROOT, r.lstrip("/")), encoding="utf-8") as f:
+                code += f.read()
+        self.assertIn("rostas-licence.newsletters-432.workers.dev", code)
+        self.assertNotIn('data-rostas-wired="1"', self.html)
+
+
 class StaticFiles(unittest.TestCase):
+    def test_assets_cached_long(self):
+        with open(os.path.join(ROOT, "_headers"), encoding="utf-8") as f:
+            h = f.read()
+        self.assertIn("/assets/*", h)
+        self.assertIn("immutable", h)
+
     def test_404_page_exists(self):
         p = os.path.join(ROOT, "404.html")
         self.assertTrue(os.path.exists(p))

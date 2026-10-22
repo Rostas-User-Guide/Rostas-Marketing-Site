@@ -34,6 +34,30 @@ The Action also runs when anything in `scripts/` changes, so a change to
 the popup wording or the splice rebuilds `index.html` from the export
 already here.
 
+### Plain HTML (added 22 Oct 2026)
+
+After splicing, the Action runs `scripts/prerender.py`. It opens the
+spliced page in a headless Chromium, lets it unpack and draw itself, and
+saves what it drew as ordinary HTML: `index.html` (about 60 KB, every word
+readable by search engines) plus content-named files in `assets/`
+(pictures, fonts, scripts, styles). React's code is saved already compiled,
+so the in-browser Babel compiler is no longer downloaded, and React's
+development build is swapped for the production build kept in
+`scripts/vendor/` (same version; if a future export uses another React
+version the Action warns and keeps the development build until the
+matching files are added there). `_headers` lets browsers keep
+`assets/` files for a year; a changed file always gets a new name.
+
+prerender.py checks its own result in Chromium (no script errors, headline
+and demos drawn, three pricing buttons wired, Babel gone) and
+`scripts/test_seo.py` checks the committed page; if either fails the
+Action stops and the site keeps the previous page. The Action runs on
+every branch, so pushing a branch gives a Cloudflare preview
+(`<branch>.rostas.pages.dev`) of the finished page.
+
+Nothing changes for an export: upload `raw-export.html` as before.
+Don't hand-edit `index.html` or `assets/`.
+
 **Still verify live after every deploy** — see the "After deploying"
 check below. Automation prevents the *forgetting* failure mode; it
 doesn't replace looking at the real site.
