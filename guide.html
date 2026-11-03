@@ -17,6 +17,10 @@
   a step's video plays (so the mouse is easy to follow), and SMALL while they
   do the step themselves. Other browsers get the guide in this tab as before,
   plus a "pop out the video" button where the browser supports it.
+
+  3 Nov 2026: a step can have no video (no id). It shows its words only, and
+  the floating guide stays small for it. Used for "share your sheet with
+  rostasapp@gmail.com", which has no clip yet.
 -->
 <style id="guide-styles">
   :root{
@@ -201,7 +205,7 @@
 
 <header class="tab-only">
   <span class="wordmark">Rostas Setup Guide</span>
-  <span class="step-count" id="step-count">Step 1 of 6</span>
+  <span class="step-count" id="step-count">Step 1 of 7</span>
 </header>
 <div class="progress-track tab-only"><div class="progress-fill" id="progress-fill"></div></div>
 
@@ -223,7 +227,7 @@
 
     <div class="panel" id="panel">
       <div class="pip-bar pip-only">
-        <span id="pip-count">Step 1 of 6</span>
+        <span id="pip-count">Step 1 of 7</span>
         <button class="size-btn" id="size-btn" type="button">Make smaller</button>
       </div>
 
@@ -231,7 +235,7 @@
       <div id="step-view">
         <div class="step-label" id="step-label">Step 1</div>
         <h1 id="step-title"></h1>
-        <div class="video-wrap">
+        <div class="video-wrap" id="video-wrap">
           <video id="step-video" controls preload="metadata" playsinline></video>
         </div>
         <button class="link-btn pop-video tab-only hidden" id="pop-video-btn" type="button">Pop the video out so it stays on top</button>
@@ -263,8 +267,9 @@
 (function(){
   var COPY_URL = 'https://docs.google.com/spreadsheets/d/1SHrry71Ge3vA8GgwOG7INz4Wyq1tvyaihaWWsffT12Y/copy';
 
-  // Each entry: id (matches /videos/<id>.mp4), title, short caption, and an
-  // optional button the step needs (opens in the main browser window).
+  // Each entry: id (matches /videos/<id>.mp4; leave it out for a step with
+  // no video), title, short caption, and an optional button the step needs
+  // (opens in the main browser window).
   var STEPS = [
     {
       id: 'clip1',
@@ -296,6 +301,10 @@
       id: 'clip5',
       title: "You're in",
       caption: 'Paste your Web app URL into a new tab to open your Rostas Setup Wizard, and bookmark it. If Google says “Sorry, unable to open the file”, your browser is signed in to more than one Google account: open the link in an Incognito window (Ctrl+Shift+N) instead. No sign-in needed.'
+    },
+    {
+      title: 'Let Rostas keep your copy up to date',
+      caption: 'In your Rostas sheet, click Share (top right). Type rostasapp@gmail.com, choose Editor, and click Send. This lets Rostas send your copy fixes and new features, the same as every other church. Your copy then finishes setting each update up by itself, so you never need to open the script editor again. Rostas uses this access only to update your copy of Rostas.'
     }
   ];
 
@@ -355,7 +364,7 @@
     } else if (pipWin && pipSmall){
       nextBtn.textContent = last ? "I've done this — finish" : "I've done this — next step";
       nextBtn.disabled = false;
-      replay.classList.remove('hidden');
+      replay.classList.toggle('hidden', !STEPS[current].id);
     } else {
       nextBtn.textContent = last ? "I've done this — finish" : "I've done this — show me the next step";
       nextBtn.disabled = !videoDone;
@@ -385,12 +394,18 @@
     video.pause();
     video.removeAttribute('src');
     video.load();
-    video.src = '/videos/' + s.id + '.mp4';
-    video.load();
-    if (autoplay) play();
+    el('video-wrap').classList.toggle('hidden', !s.id);
+    el('skip-link').classList.toggle('hidden', !s.id);
+    el('pop-video-btn').style.display = s.id ? '' : 'none';
+    if (s.id){
+      video.src = '/videos/' + s.id + '.mp4';
+      video.load();
+      if (autoplay) play();
+    }
 
-    videoDone = false;
+    videoDone = !s.id;     // nothing to watch: the next button works at once
     el('back-btn').style.visibility = (i === 0) ? 'hidden' : 'visible';
+    if (pipWin && !s.id) setPipSmall(true);   // no video to show large
     updateButtons();
     if (!pipWin) window.scrollTo(0, 0);
   }
