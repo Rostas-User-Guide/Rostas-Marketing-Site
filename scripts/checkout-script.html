@@ -111,11 +111,12 @@
       "margin:0 0 12px 0"
     ].join(";"));
 
-    // Wording agreed with Guy 12 Oct 2026: first group is five New Zealand
-    // churches; no subscription charge in the beta, texts are still paid for.
+    // Wording agreed with Guy 12 Oct 2026: first group is ten New Zealand
+    // churches (five until 4 Nov 2026); no subscription charge in the beta,
+    // texts are still paid for.
     var body = document.createElement("p");
     body.setAttribute("style", "color:#3d4a5c;font-size:15px;line-height:1.5;margin:0 0 20px 0;");
-    body.textContent = "We're starting with five New Zealand churches. There's no subscription charge during the beta, and you pay only for the texts you send. Tell us about your church and we'll be in touch.";
+    body.textContent = "We're starting with ten New Zealand churches. There's no subscription charge during the beta, and you pay only for the texts you send. Tell us about your church and we'll be in touch.";
 
     var formLink = document.createElement("a");
     formLink.id = "rostas-beta-form-link";
