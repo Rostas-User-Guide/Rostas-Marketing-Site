@@ -19,8 +19,8 @@
   plus a "pop out the video" button where the browser supports it.
 
   3 Nov 2026: a step can have no video (no id). It shows its words only, and
-  the floating guide stays small for it. Step 7 ("share your sheet with
-  rostasapp@gmail.com") started that way and now has its own clip, clip6.
+  the floating guide stays small for it. (No step uses this now: sharing the
+  sheet with rostasapp@gmail.com is part of clip1, spliced in 3 Nov 2026.)
 -->
 <style id="guide-styles">
   :root{
@@ -205,7 +205,7 @@
 
 <header class="tab-only">
   <span class="wordmark">Rostas Setup Guide</span>
-  <span class="step-count" id="step-count">Step 1 of 7</span>
+  <span class="step-count" id="step-count">Step 1 of 6</span>
 </header>
 <div class="progress-track tab-only"><div class="progress-fill" id="progress-fill"></div></div>
 
@@ -227,7 +227,7 @@
 
     <div class="panel" id="panel">
       <div class="pip-bar pip-only">
-        <span id="pip-count">Step 1 of 7</span>
+        <span id="pip-count">Step 1 of 6</span>
         <button class="size-btn" id="size-btn" type="button">Make smaller</button>
       </div>
 
@@ -273,8 +273,8 @@
   var STEPS = [
     {
       id: 'clip1',
-      title: 'Copy your spreadsheet & open Apps Script',
-      caption: 'Make your own copy of the Rostas spreadsheet, then open the Apps Script editor from the Extensions menu.',
+      title: 'Copy your spreadsheet, share it with rostasapp@gmail.com & open Apps Script',
+      caption: 'Make your own copy of the Rostas spreadsheet. Then click Share (top right), type rostasapp@gmail.com, choose Editor and click Send, so Rostas can keep your copy up to date. Then open the Apps Script editor from the Extensions menu.',
       action: { label: 'Make your copy of Rostas →', href: COPY_URL }
     },
     {
@@ -301,11 +301,6 @@
       id: 'clip5',
       title: "You're in",
       caption: 'Paste your Web app URL into a new tab to open your Rostas Setup Wizard, and bookmark it. If Google says “Sorry, unable to open the file”, your browser is signed in to more than one Google account: open the link in an Incognito window (Ctrl+Shift+N) instead. No sign-in needed.'
-    },
-    {
-      id: 'clip6',
-      title: 'Let Rostas keep your copy up to date',
-      caption: 'In your Rostas sheet, click Share (top right). Type rostasapp@gmail.com, choose Editor, and click Send. This lets Rostas send your copy fixes and new features, the same as every other church. Your copy then finishes setting each update up by itself, so you never need to open the script editor again. Rostas uses this access only to update your copy of Rostas.'
     }
   ];
 

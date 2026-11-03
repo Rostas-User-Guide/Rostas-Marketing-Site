@@ -406,7 +406,7 @@
       <div class="big-num">1</div>
       <div class="body">
         <span class="step-title">Open the video guide</span>
-        <p id="guide-intro">Seven short clips, about seven minutes in all. The guide sits on one side of your screen and your spreadsheet on the other, so you can watch and click at the same time.</p>
+        <p id="guide-intro">Six short clips, about seven minutes in all. The guide sits on one side of your screen and your spreadsheet on the other, so you can watch and click at the same time.</p>
         <button class="primary-btn" id="open-guide-btn" type="button">Open the video guide</button>
         <a class="primary-btn hidden" id="open-guide-link" href="/guide.html" target="_blank" rel="noopener">Open the video guide</a>
 
@@ -456,6 +456,10 @@
       <p class="lead" style="margin-bottom:14px;">These are the same steps the clips show, starting once your copy has opened.</p>
       <ol class="steps">
         <li>
+          <span class="step-title">Let Rostas keep your copy up to date</span>
+          In your new sheet, click <strong>Share</strong> (top right). Type <strong>rostasapp@gmail.com</strong>, choose <strong>Editor</strong>, and click <strong>Send</strong>. This lets Rostas send your copy fixes and new features, the same as every other church. Your copy then finishes setting each update up by itself, so once setup is done you never need to open the script editor again. Rostas uses this access only to update your copy of Rostas.
+        </li>
+        <li>
           <span class="step-title">Open the script editor</span>
           In your new sheet, open the <strong>Extensions</strong> menu and choose <strong>Apps Script</strong>. It opens in another tab. You won't need to touch any code.
         </li>
@@ -497,10 +501,6 @@
         <li>
           <span class="step-title">Enter your licence key</span>
           The wizard's first step asks for it. Paste in the key from the top of this page.
-        </li>
-        <li>
-          <span class="step-title">Let Rostas keep your copy up to date</span>
-          In your Rostas sheet, click <strong>Share</strong> (top right). Type <strong>rostasapp@gmail.com</strong>, choose <strong>Editor</strong>, and click <strong>Send</strong>. This lets Rostas send your copy fixes and new features, the same as every other church. Your copy then finishes setting each update up by itself, so you never need to open the script editor again. Rostas uses this access only to update your copy of Rostas.
         </li>
         <li>
           <span class="step-title">Put Rostas on your desktop</span>
@@ -657,7 +657,7 @@
     if ('documentPictureInPicture' in window && window.innerWidth >= 700){
       // Chrome and Edge: the guide opens in a new tab and offers to float
       // on top of every window (10 Oct 2026), so no window arranging.
-      el('guide-intro').textContent = "Seven short clips, about seven minutes in all. The guide opens in a new tab. Click “Float the guide on top” there and it stays above your spreadsheet: large while you watch each step, small while you do it.";
+      el('guide-intro').textContent = "Six short clips, about seven minutes in all. The guide opens in a new tab. Click “Float the guide on top” there and it stays above your spreadsheet: large while you watch each step, small while you do it.";
       el('open-guide-btn').classList.add('hidden');
       el('open-guide-link').classList.remove('hidden');
       return;
