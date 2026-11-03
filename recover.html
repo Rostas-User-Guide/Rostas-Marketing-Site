@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Lost your Rostas licence key?</title>
+<meta name="description" content="Enter the email address your church used to sign up for Rostas and we'll send your licence key to it.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<!--
+  rostas.app/recover - lost licence key (3 Nov 2026). Sends the email to the
+  licence Worker's /api/recover, which emails the key if that address has a
+  Rostas subscription. The Worker gives the same answer either way, so this
+  page can't be used to find out which churches use Rostas, and the page
+  must not hint otherwise. Same look as /beta.
+
+  (c) 2026 Guy Pilkinton trading as Rostas. All rights reserved.
+-->
+<style>
+  :root{
+    --navy:#1a2e4a; --navy-deep:#12233a; --gold:#b8932a; --gold-dark:#8a6d1c;
+    --gold-pale:#fdf8ee; --green:#2d7a4f; --green-light:#e6f3ec; --red:#b3261e; --red-light:#fdecea;
+    --bg:#f7f9fb; --card:#ffffff; --text:#1e2d3d; --muted:#5a6a7e;
+    --border:#dde4ed; --radius:8px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:'DM Sans','Helvetica Neue',Arial,sans-serif;
+    min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; padding:32px 16px;
+  }
+  .card{
+    width:100%; max-width:520px; background:var(--card);
+    border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:0 1px 3px rgba(26,46,74,0.06), 0 12px 32px -16px rgba(26,46,74,0.22);
+    padding:40px 36px 34px;
+  }
+  @media (max-width:480px){ .card{ padding:30px 22px 26px; } }
+  .eyebrow{ font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--gold-dark); font-weight:600; margin-bottom:10px; }
+  h1{ font-family:'Lora',serif; font-size:28px; line-height:1.25; margin:0 0 10px; color:var(--navy); font-weight:700; }
+  p{ font-size:16px; line-height:1.55; margin:0 0 14px; }
+  .muted{ color:var(--muted); }
+  label{ display:block; font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:var(--muted); font-weight:600; margin:18px 0 8px; }
+  input{
+    width:100%; font:400 17px/1.3 'DM Sans',Arial,sans-serif;
+    padding:12px 14px; border:1px solid var(--border); border-radius:8px; color:var(--navy); background:#fff;
+  }
+  input:focus{ outline:2px solid var(--gold); outline-offset:1px; border-color:var(--gold); }
+  button{
+    margin-top:18px; width:100%; border:0; border-radius:8px; cursor:pointer;
+    background:var(--gold-dark); color:#fff; font:600 17px 'DM Sans',Arial,sans-serif; padding:15px 18px;
+  }
+  button:hover{ background:#7f6219; }
+  button:focus-visible{ outline:2px solid var(--navy); outline-offset:2px; }
+  button:disabled{ opacity:0.7; cursor:wait; }
+  .msg{ display:none; margin-top:16px; padding:12px 14px; border-radius:8px; font-size:15px; line-height:1.5; }
+  .msg.show{ display:block; }
+  .msg.err{ background:var(--red-light); color:var(--red); }
+  .ok{ background:var(--green-light); color:#1f5c3a; border-radius:8px; padding:14px 16px; font-size:16px; line-height:1.5; margin:4px 0 16px; }
+  .ok strong{ word-break:break-all; }
+  .small{ font-size:13px; color:var(--muted); margin-top:18px; line-height:1.5; }
+  a{ color:var(--navy); }
+  .link-btn{ background:none; color:var(--navy); text-decoration:underline; width:auto; padding:0; margin:0; font:500 15px 'DM Sans',Arial,sans-serif; }
+  .link-btn:hover{ background:none; color:var(--gold-dark); }
+  [hidden]{ display:none !important; }
+</style>
+</head>
+<body>
+<main class="card">
+  <div id="ask">
+    <div class="eyebrow">Licence key</div>
+    <h1>Lost your licence key?</h1>
+    <p class="muted">Enter the email address your church used to sign up for Rostas. We'll send the key to it.</p>
+
+    <form id="recover-form" novalidate>
+      <label for="email">Email address</label>
+      <input id="email" name="email" type="email" autocomplete="email" inputmode="email" spellcheck="false" placeholder="office@yourchurch.org.nz" maxlength="254">
+      <button id="go" type="submit">Email me my key</button>
+      <div id="msg" class="msg err" role="alert"></div>
+    </form>
+
+    <p class="small">Your key starts with RSTS and is also in the welcome email you got when you signed up.<br><br>
+    Questions? Email <a href="mailto:support@rostas.app">support@rostas.app</a>.</p>
+  </div>
+
+  <div id="sent" hidden>
+    <div class="eyebrow">Licence key</div>
+    <h1>Check your inbox</h1>
+    <div class="ok" role="status">If <strong id="sent-to"></strong> has a Rostas subscription, the key is on its way. It usually arrives within a minute.</div>
+    <p>Not there? Check your spam folder, or try the other email address your church uses.</p>
+    <p><button type="button" class="link-btn" id="again">Try another email address</button></p>
+    <p class="small">Still stuck? Email <a href="mailto:support@rostas.app">support@rostas.app</a> and we'll sort it out.</p>
+  </div>
+</main>
+
+<script>
+(function(){
+  var WORKER_BASE = "https://rostas-licence.newsletters-432.workers.dev";
+  var form = document.getElementById("recover-form");
+  var input = document.getElementById("email");
+  var btn = document.getElementById("go");
+  var msg = document.getElementById("msg");
+  var ask = document.getElementById("ask");
+  var sent = document.getElementById("sent");
+  var MESSAGES = {
+    missing_email: "Please enter the email address your church used to sign up.",
+    not_an_email: "That doesn't look like an email address. Check it and try again.",
+    rate_limited: "Too many tries from this connection. Please wait an hour, or email support@rostas.app.",
+    other: "Something went wrong sending your key. Please try again in a minute, or email support@rostas.app."
+  };
+
+  function show(text){ msg.textContent = text; msg.className = "msg err show"; }
+  function reset(){ btn.disabled = false; btn.textContent = "Email me my key"; }
+
+  form.addEventListener("submit", function(ev){
+    ev.preventDefault();
+    var email = (input.value || "").trim();
+    if (!email) { show(MESSAGES.missing_email); input.focus(); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { show(MESSAGES.not_an_email); input.focus(); return; }
+    msg.className = "msg err";
+    btn.disabled = true;
+    btn.textContent = "Sending…";
+    fetch(WORKER_BASE + "/api/recover", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email })
+    }).then(function(r){ return r.json(); })
+      .then(function(data){
+        reset();
+        if (data && data.ok) {
+          document.getElementById("sent-to").textContent = email;
+          ask.hidden = true;
+          sent.hidden = false;
+          return;
+        }
+        show(MESSAGES[data && data.reason] || MESSAGES.other);
+      })
+      .catch(function(){ reset(); show(MESSAGES.other); });
+  });
+
+  document.getElementById("again").addEventListener("click", function(){
+    input.value = "";
+    msg.className = "msg err";
+    sent.hidden = true;
+    ask.hidden = false;
+    input.focus();
+  });
+})();
+</script>
+</body>
+</html>
