@@ -406,7 +406,7 @@
       <div class="big-num">1</div>
       <div class="body">
         <span class="step-title">Open the video guide</span>
-        <p id="guide-intro">Six short clips, about six minutes in all. The guide sits on one side of your screen and your spreadsheet on the other, so you can watch and click at the same time.</p>
+        <p id="guide-intro">Seven short clips, about seven minutes in all. The guide sits on one side of your screen and your spreadsheet on the other, so you can watch and click at the same time.</p>
         <button class="primary-btn" id="open-guide-btn" type="button">Open the video guide</button>
         <a class="primary-btn hidden" id="open-guide-link" href="/guide.html" target="_blank" rel="noopener">Open the video guide</a>
 
@@ -657,7 +657,7 @@
     if ('documentPictureInPicture' in window && window.innerWidth >= 700){
       // Chrome and Edge: the guide opens in a new tab and offers to float
       // on top of every window (10 Oct 2026), so no window arranging.
-      el('guide-intro').textContent = "Six short clips, about six minutes in all. The guide opens in a new tab. Click “Float the guide on top” there and it stays above your spreadsheet: large while you watch each step, small while you do it.";
+      el('guide-intro').textContent = "Seven short clips, about seven minutes in all. The guide opens in a new tab. Click “Float the guide on top” there and it stays above your spreadsheet: large while you watch each step, small while you do it.";
       el('open-guide-btn').classList.add('hidden');
       el('open-guide-link').classList.remove('hidden');
       return;
