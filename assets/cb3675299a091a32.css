@@ -523,7 +523,7 @@ button { font-family: inherit; cursor: pointer; }
   object-fit: contain;
 }
 .nav-links {
-  display: flex; gap: 40px;
+  display: flex; gap: 32px;
   margin-left: 32px;
 }
 .nav-links a {
@@ -581,6 +581,69 @@ section.compact { padding: 70px 0; }
 }
 .section-head.left { text-align: left; margin: 0 0 50px; }
 .section-head.left h2, .section-head.left p { margin-left: 0; margin-right: 0; }
+
+/* ─── BETA READY (3 Nov 2026): ribbon, hero phone, app strip, beta pricing ─── */
+.beta-ribbon {
+  background: #12233a; color: #f1e6c8;
+  font-size: 14px; line-height: 1.45; text-align: center;
+  padding: 9px 20px;
+}
+.beta-ribbon a { color: #f3d98a; font-weight: 600; margin-left: 6px; text-underline-offset: 3px; }
+.beta-ribbon a:hover { color: #fff; }
+.hero-copy h1 { font-size: 52px; }
+.hero-vis { padding-left: 56px; }
+.hero-phone {
+  position: absolute; left: -22px; bottom: -64px;
+  width: 196px; height: auto; z-index: 2;
+  filter: drop-shadow(0 18px 30px rgba(18,35,58,0.35));
+}
+.app-strip { background: #fff; border-bottom: 1px solid var(--border); padding: 34px 0; }
+.app-strip-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+.app-strip-item { display: flex; gap: 14px; align-items: flex-start; }
+.app-strip-item .material-symbols-rounded {
+  flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--gold-pale); color: #8d7020; font-size: 22px;
+}
+.app-strip-item h2 { font-family: var(--font-sans); font-size: 16px; line-height: 1.35; letter-spacing: 0; color: var(--navy); margin: 0 0 4px; font-weight: 700; }
+.app-strip-item p { font-size: 14.5px; line-height: 1.55; color: var(--text-muted); margin: 0; }
+.app-strip-item a { color: var(--navy); font-weight: 600; }
+.beta-plan {
+  max-width: 980px; margin: 0 auto;
+  display: grid; grid-template-columns: 1.35fr 1fr; gap: 36px; align-items: center;
+  background: #fff; border: 2px solid var(--gold); border-radius: 16px;
+  padding: 34px 36px; position: relative;
+  box-shadow: 0 16px 40px rgba(26,46,74,0.10);
+}
+.beta-plan .plan-tag { left: 36px; }
+.beta-plan h3 { font-family: var(--font-serif); font-size: 28px; color: var(--navy); margin: 0 0 12px; font-weight: 700; }
+.beta-plan .plan-features { margin: 0; }
+.beta-plan-act .btn { justify-content: center; width: 100%; }
+.beta-plan-act p { font-size: 14px; line-height: 1.55; color: var(--text-muted); margin: 14px 0 0; }
+.after-beta { max-width: 980px; margin: 40px auto 0; }
+.after-beta-label {
+  font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-muted); font-weight: 700; margin-bottom: 12px;
+}
+.after-beta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.after-beta-grid > div {
+  border: 1px dashed #c3cedb; border-radius: 12px; padding: 16px 18px;
+  font-size: 14px; line-height: 1.5; color: var(--text-muted); background: var(--bg);
+}
+.after-beta-grid strong { display: block; font-family: var(--font-serif); font-size: 21px; color: var(--navy); margin-bottom: 2px; }
+.after-beta-note { font-size: 14px; color: var(--text-muted); margin: 14px 0 0; line-height: 1.55; }
+@media (max-width: 960px) {
+  .hero-vis { padding-left: 0; margin-top: 24px; }
+  .hero-phone { width: 150px; left: -6px; bottom: -40px; }
+  .app-strip-grid, .after-beta-grid { grid-template-columns: 1fr; gap: 18px; }
+  .beta-plan { grid-template-columns: 1fr; gap: 22px; padding: 30px 24px; }
+  .beta-plan .plan-tag { left: 24px; }
+}
+@media (max-width: 620px) {
+  .hero-copy h1 { font-size: 38px; }
+  .hero-phone { width: 118px; bottom: -28px; }
+  .beta-ribbon { font-size: 13px; padding: 8px 16px; }
+}
 
 /* ─── HERO LOGO ────────────────────────────────────────────── */
 .hero-logo {
@@ -667,7 +730,7 @@ section.compact { padding: 70px 0; }
   color: #fff;
 }
 .hero-vis-tag .dot .material-symbols-rounded { font-size: 16px; }
-.hero-vis-tag-1 { top: 8%;  left: -28px; }
+.hero-vis-tag-1 { top: -18px; left: auto; right: 24px; }
 .hero-vis-tag-1 .dot { background: var(--green); }
 .hero-vis-tag-2 { top: 42%; right: -36px; }
 .hero-vis-tag-2 .dot { background: var(--gold); }

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- Plain HTML made by scripts/prerender.py from raw-export.html. Do not edit by hand. -->
-<html lang="en" class="tw-density-regular" style="--gold: #b8932a; --navy: #1a2e4a;"><head><script>window.__resources = {"boardImg":"/assets/cfb8ba7c809687d3.webp","rmark":"/assets/c3e8ea39b5c85c18.webp"};</script>
+<html lang="en"><head><script>window.__resources = {"boardImg":"/assets/cfb8ba7c809687d3.webp","rmark":"/assets/c3e8ea39b5c85c18.webp"};</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rostas — Church Volunteer Roster Software for NZ &amp; Australia</title>
@@ -25,7 +25,7 @@
   font-style: normal;
   font-weight: 500;
   font-display: block;
-  src: url("/assets/daafb10aa43907ed.woff2") format('woff2');
+  src: url("/assets/6f4ce0e1452de3ba.woff2") format('woff2');
 }
 
 .material-symbols-rounded {
@@ -44,7 +44,7 @@
   -webkit-font-smoothing: antialiased;
 }
 </style>
-<link rel="stylesheet" href="/assets/810c4c65f0b37c78.css">
+<link rel="stylesheet" href="/assets/cb3675299a091a32.css">
 <link rel="stylesheet" href="/assets/5c2906cc1ceed6ee.css">
 <link rel="canonical" href="https://rostas.app/">
 <meta property="og:url" content="https://rostas.app/">
@@ -52,7 +52,7 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="preload" href="/assets/daafb10aa43907ed.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/6f4ce0e1452de3ba.woff2" as="font" type="font/woff2" crossorigin>
 <style id="readable-colours">
 /* Added by scripts/prerender.py (readable_colours). Do not edit index.html by hand. */
 .eyebrow, .cycle-step .num, .shot-caption .e, .shots-grid--3 .shot-caption .e { color: #8a6d1c; }
@@ -67,6 +67,9 @@
 </head>
 <body>
 
+<!-- ═══════════ BETA RIBBON ═══════════ -->
+<div class="beta-ribbon">Rostas is in beta. Free for a small number of NZ churches and community groups while we finish it.<a href="#cta" data-rostas-beta="">Apply&nbsp;→</a></div>
+
 <!-- ═══════════ NAV ═══════════ -->
 <nav class="nav" data-screen-label="01 Marketing site">
   <div class="nav-inner">
@@ -78,9 +81,10 @@
       <a href="#app">The app</a>
       <a href="#features">Features</a>
       <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
     </div>
     <div class="nav-cta">
-      <a href="#pricing" class="btn btn--primary tw-cta-primary"> Join the beta</a>
+      <a href="#cta" class="btn btn--primary tw-cta-primary" data-rostas-beta="">Join the beta</a>
     </div>
   </div>
 </nav>
@@ -88,16 +92,18 @@
 
 <!-- ═══════════ HERO ═══════════ -->
 <header class="hero">
-  <div class="container">
-    <img src="/assets/84c6310c31f25cd1.webp" alt="Rostas" class="hero-logo" width="381" height="141" decoding="async">
-  </div>
   <div class="container hero-inner">
     <div class="hero-copy">
-      <span class="eyebrow">For churches &amp; community groups</span>
-      <h1 id="hero-headline">Automated rostering<br>with empathy.</h1>
-      <p class="lede" id="hero-lede">Rostas collects availability, builds the roster and finds replacements automatically. Volunteers answer in the Rostas app, or by text and email if they'd rather not install it. Coordinators get their evenings back. Volunteers serve alongside the people they love.</p>
+      <span class="eyebrow">For whoever does the church roster</span>
+      <h1 id="hero-headline"><em>Stop chasing volunteers.</em><br>Rostas fills the roster and finds the cover.</h1>
+      <p class="lede" id="hero-lede">
+        Rostas asks your volunteers when they're free, builds a fair roster, and when someone can't make it on Saturday night, it finds a replacement without a phone call from you. Built for churches, and just as good for clubs and community groups.
+      </p>
       <div class="hero-cta-row">
-        <a href="#pricing" class="btn btn--gold btn--lg tw-cta-primary"><span class="material-symbols-rounded">rocket_launch</span> Join the beta</a>
+        <a href="#cta" class="btn btn--gold btn--lg tw-cta-primary" data-rostas-beta="">
+          <span class="material-symbols-rounded">rocket_launch</span>
+          Apply for the beta
+        </a>
         <a href="#video" class="btn btn--ghost btn--lg">
           <span class="material-symbols-rounded">play_circle</span>
           Watch the 3-min intro
@@ -121,13 +127,28 @@
         <span class="dot"><span class="material-symbols-rounded">favorite</span></span>
         Rostered together
       </div>
-      <div class="hero-vis-tag hero-vis-tag-3">
-        <span class="dot"><span class="material-symbols-rounded">swap_horiz</span></span>
-        Answer in one tap
-      </div>
+      <img src="/assets/d3a47ae73e4b4b7c.webp" alt="The Rostas app on a volunteer's phone: a request to cover a role, their next rostered Sundays and their availability" class="hero-phone" width="420" height="803" decoding="async">
     </div>
   </div>
 </header>
+
+<!-- ═══════════ APP STRIP (3 Nov 2026) ═══════════ -->
+<section class="app-strip" aria-label="The Rostas app">
+  <div class="container app-strip-grid">
+    <div class="app-strip-item">
+      <span class="material-symbols-rounded" aria-hidden="true">smartphone</span>
+      <div><h2>Your volunteers get an app</h2><p>Android and iPhone, straight from their link. No app store, no password. <a href="#app">See it</a></p></div>
+    </div>
+    <div class="app-strip-item">
+      <span class="material-symbols-rounded" aria-hidden="true">sms</span>
+      <div><h2>Or just a text and an email</h2><p>Anyone who won't install it keeps getting links. Nothing changes for them.</p></div>
+    </div>
+    <div class="app-strip-item">
+      <span class="material-symbols-rounded" aria-hidden="true">savings</span>
+      <div><h2>Fewer texts to pay for</h2><p>An app notification that arrives replaces the text.</p></div>
+    </div>
+  </div>
+</section>
 
 <!-- ═══════════ VIDEO ═══════════ -->
 <section class="video-section" id="video">
@@ -685,55 +706,32 @@
   <div class="container">
     <div class="section-head">
       <span class="eyebrow">Pricing</span>
-      <h2>Free for 30 days. Then NZ$30 a month or NZ$299 a year.</h2>
-      <p>No per-volunteer fees. No per-roster fees. Every feature from day one, including the volunteer app. Texts are prepaid: 12.5c each in New Zealand during the beta, in packs from NZ$31.25 for 250. Prices in other countries will differ. Credits don't expire, and app notifications are free.</p>
+      <h2>Free during the beta.</h2>
+      <p>No per-volunteer fees. No per-roster fees. Every feature from day one, including the volunteer app. Texts are prepaid: 12.5c each in New Zealand, in packs from NZ$31.25 for 250. Credits don't expire, and app notifications are free.</p>
     </div>
 
-    <div class="beta-notice"><span class="material-symbols-rounded">science</span><p><strong>Rostas is in beta, and there's no subscription charge during the beta.</strong> You pay only for the texts you send. We're setting up a small number of churches and community groups in New Zealand by hand. Join the beta and we'll be in touch. The prices below apply once signups open.</p></div>
-
-    <div class="pricing-grid">
-      <div class="plan">
-        <div class="plan-name">Free Trial</div>
-        <div class="plan-desc">Try every feature for 30 days.</div>
-        <div class="plan-price"><span class="amount">Free</span></div>
-        <div class="plan-period">for 30 days</div>
+    <div class="beta-plan">
+      <div class="plan-tag">NOW · BETA</div>
+      <div>
+        <h3>Free while Rostas is in beta</h3>
         <ul class="plan-features">
-          <li><span class="material-symbols-rounded">check_circle</span>Unlimited roster types</li>
-          <li><span class="material-symbols-rounded">check_circle</span>Unlimited volunteers</li>
-          <li><span class="material-symbols-rounded">check_circle</span>The volunteer app, with text and email for everyone else</li>
-          <li><span class="material-symbols-rounded">check_circle</span>Relational rostering — family &amp; buddy system</li>
-          <li><span class="material-symbols-rounded">check_circle</span>20 free text credits</li>
+          <li><span class="material-symbols-rounded">check_circle</span>Every feature, unlimited volunteers and rosters, and the volunteer app.</li>
+          <li><span class="material-symbols-rounded">check_circle</span>No card. 20 free texts, then 12.5c a text, bought when you need them.</li>
+          <li><span class="material-symbols-rounded">check_circle</span>At least 30 days' notice before the beta ends. You're only charged if you then choose to subscribe.</li>
         </ul>
-        <a href="#cta" class="btn btn--ghost">Join the beta</a>
       </div>
-
-      <div class="plan">
-        <div class="plan-name">Monthly</div>
-        <div class="plan-desc">For churches and community groups who want flexibility.</div>
-        <div class="plan-price"><span class="currency">NZ$</span><span class="amount">30</span></div>
-        <div class="plan-period">per month</div>
-        <ul class="plan-features">
-          <li><span class="material-symbols-rounded">check_circle</span>Everything in the free trial</li>
-          <li><span class="material-symbols-rounded">check_circle</span>Unlimited volunteers, rosters and coordinators</li>
-          <li><span class="material-symbols-rounded">check_circle</span>Your own wording for texts, notifications and emails</li>
-          <li><span class="material-symbols-rounded">check_circle</span>Email support</li>
-          <li><span class="material-symbols-rounded">check_circle</span>Cancel anytime</li>
-        </ul>
-        <a href="#cta" class="btn btn--ghost">Join the beta</a>
+      <div class="beta-plan-act">
+        <a href="#cta" class="btn btn--gold">Apply for the beta</a>
+        <p>We're setting up a small number of NZ churches and community groups by hand. Apply and we'll be in touch within a few days.</p>
       </div>
+    </div>
 
-      <div class="plan plan--featured">
-        <div class="plan-tag">BEST VALUE</div>
-        <div class="plan-name">Annual</div>
-        <div class="plan-desc">Everything in Monthly, billed once a year.</div>
-        <div class="plan-price"><span class="currency">NZ$</span><span class="amount">299</span></div>
-        <div class="plan-period">per year · billed annually</div>
-        <ul class="plan-features">
-          <li><span class="material-symbols-rounded">check_circle</span>Everything in Monthly</li>
-          <li><span class="material-symbols-rounded">check_circle</span>Save NZ$61 a year</li>
-          <li><span class="material-symbols-rounded">check_circle</span>Free help getting set up</li>
-        </ul>
-        <a href="#cta" class="btn btn--gold">Join the beta</a>
+    <div class="after-beta">
+      <div class="after-beta-label">After the beta</div>
+      <div class="after-beta-grid">
+        <div><strong>30 days free</strong>Every feature. A card is needed, and nothing is charged until day 30.</div>
+        <div><strong>NZ$30 a month</strong>Cancel any time.</div>
+        <div><strong>NZ$299 a year</strong>Saves NZ$61, with free help getting set up.</div>
       </div>
     </div>
   </div>
@@ -811,10 +809,10 @@
         </div>
       </div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">How long is the trial — really?</button>
+        <button class="faq-q" onclick="toggleFaq(this)">What happens when the beta ends?</button>
         <div class="faq-a">
-          A full 30 days, with every feature unlocked. A card is required to start, but you won't be charged
-          until the trial ends — cancel any time before then. We'll send a reminder a week before it does.
+          We'll tell you at least 30 days before. You can then subscribe at NZ$30 a month or NZ$299 a year, or stop.
+          You won't be charged unless you choose to subscribe. Your rosters and volunteer list stay in your own Google Sheet either way.
         </div>
       </div>
     </div>
@@ -826,7 +824,10 @@
   <div class="container final-cta-inner">
     <h2>Join the beta.</h2>
     <p>We're setting up a small number of churches and community groups in New Zealand. There's no subscription charge during the beta, and you pay only for the texts you send. Import your volunteers and send your first availability email the same day. When signups open, Rostas is free for 30 days, then NZ$30 a month or NZ$299 a year.</p>
-        <a href="#pricing" class="btn btn--gold btn--xl tw-cta-primary"><span class="material-symbols-rounded">rocket_launch</span> Join the beta</a>
+        <a href="#cta" class="btn btn--gold btn--xl tw-cta-primary" data-rostas-beta="">
+          <span class="material-symbols-rounded">rocket_launch</span>
+          Apply for the beta
+        </a>
         <div class="small-print">Free help getting set up.</div>
   </div>
 </section>
@@ -855,13 +856,14 @@
           <li><a href="#video">Intro video</a></li>
           <li><a href="/guides/">Free roster guides</a></li>
           <li><a href="#faq">FAQ</a></li>
+          <li><a href="/recover">Lost your licence key?</a></li>
         </ul>
       </div>
       <div>
         <h3>Contact</h3>
         <ul>
           <li><a href="mailto:info@rostas.app">info@rostas.app</a></li>
-          <li><a href="#pricing">Join the beta</a></li>
+          <li><a href="#cta" data-rostas-beta="">Join the beta</a></li>
         </ul>
       </div>
     </div>
@@ -911,9 +913,6 @@
 <script src="/assets/3455ac98b503c90c.js" defer></script>
 <script src="/assets/3056f53ae0f20766.js" defer></script>
 
-<script src="/assets/b9dfcb39f9f1be5f.js" defer></script>
-<script src="/assets/c5244db69bf55b3e.js" defer></script>
-<script src="/assets/a1d56ca040cfc204.js" defer></script>
 
 
 
@@ -923,5 +922,5 @@
 
 
 
-<script src="/assets/01d02f03aad6d9eb.js" defer></script>
+<script src="/assets/bf15eea4845394fc.js" defer></script>
 </body></html>

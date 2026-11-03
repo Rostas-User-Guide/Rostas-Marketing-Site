@@ -9,9 +9,11 @@
   // live checkout once ready.
   var BETA_MODE = true;
   var BETA_EMAIL = "info@rostas.app";
-  // The "Rostas Beta Testing - Sign Up" Google Form (owned by
-  // rostasapp@gmail.com). Answers land in its linked sheet.
-  var BETA_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSch73gm5QrZBWlloZc-WJffWaWDgFBKxfrKHCEiOtkgr-f93w/viewform";
+  // The "Rostas Beta Signup" Google Form, owned by rostasapp@gmail.com
+  // since 3 Nov 2026 (the earlier copy belonged to the church account).
+  // Answers land in a tab of the "Rostas Beta Invitation" sheet, next to
+  // the beta codes.
+  var BETA_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeGxCd8ZaNgoJtjyiPoLZoVFUNwMZJxfWclB5E2NzeGWGdt4Q/viewform";
 
   // Matched by exact visible button text -- robust even if you re-export
   // a slightly different design from Claude Design later, as long as the
@@ -24,8 +26,13 @@
   // only inside the pricing section, so the top-menu "Join the beta" button
   // keeps scrolling to pricing. When signups open, rename the three card
   // buttons in Claude Design back to the wording below, then flip BETA_MODE.
+  //
+  // "apply for the beta" (3 Nov 2026) is the beta card's button since the
+  // pricing section became one beta card. Like "join the beta" it has no
+  // plan, so it can only ever open the beta message.
   var BUTTON_MATCHERS = [
     { text: "join the beta",     plan: null, pricingOnly: true },
+    { text: "apply for the beta", plan: null },
     { text: "start free trial",  plan: "monthly" },
     { text: "subscribe monthly", plan: "monthly" },
     { text: "subscribe annually", plan: "annual" }
@@ -41,11 +48,19 @@
   }
 
   function findCandidates(){
-    var els = document.querySelectorAll("a.btn, button.btn");
     var out = [];
+    // 3 Nov 2026: any element marked data-rostas-beta (the top ribbon, menu
+    // button, hero, final call to action and footer link) opens the beta
+    // message too, whatever its wording or icon. Before this they only
+    // scrolled to the pricing section.
+    var marked = document.querySelectorAll("[data-rostas-beta]");
+    for (var m = 0; m < marked.length; m++){
+      if (!marked[m].getAttribute("data-rostas-wired")) out.push({ el: marked[m], plan: null });
+    }
+    var els = document.querySelectorAll("a.btn, button.btn");
     for (var i = 0; i < els.length; i++){
       var el = els[i];
-      if (el.getAttribute("data-rostas-wired")) continue;
+      if (el.getAttribute("data-rostas-wired") || el.hasAttribute("data-rostas-beta")) continue;
       var text = (el.textContent || "").trim().toLowerCase();
       for (var j = 0; j < BUTTON_MATCHERS.length; j++){
         if (text === BUTTON_MATCHERS[j].text){
