@@ -87,7 +87,7 @@ class PlainHomePage(unittest.TestCase):
         self.assertNotIn('type="text/babel"', self.html)
 
     def test_words_are_plain_html(self):
-        for words in ("Automated rostering", "Pricing", "Join the beta"):
+        for words in ("Stop chasing volunteers", "Pricing", "Join the beta"):
             self.assertIn(words, self.text)
         self.assertGreater(len(self.text), 8000)
 
