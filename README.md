@@ -3,6 +3,30 @@
 Marketing / pricing page for `rostas.app`. Deployed via Cloudflare Pages,
 auto-deploying from `main`.
 
+## Editing the home page without Claude Design (3 Nov 2026)
+
+Standalone Claude Design closes on 14 Dec 2026, so the home page is now
+edited here. `scripts/export_template.py` unpacks the real page from
+`raw-export.html` into ordinary HTML and packs it back:
+
+```bash
+cd ~/rostas-marketing-site
+python3 scripts/export_template.py extract raw-export.html /tmp/page.html
+# edit /tmp/page.html
+python3 scripts/export_template.py pack raw-export.html /tmp/page.html
+```
+
+`pack --add-image <id>=picture.png` adds a picture; use the same id as the
+`<img src>` in the page. Commit `raw-export.html` and push: the Action
+below does the rest. The Claude Design "Tweaks" panel was taken out of the
+page on 3 Nov: it rewrote the hero headline, intro and main buttons from
+its own saved settings on every load, so HTML edits to them never showed.
+
+Every beta link (top ribbon, menu button, hero, pricing card, final call
+to action, footer) carries `data-rostas-beta`, which makes the checkout
+script open the beta message. The message links to the beta form
+(`BETA_FORM_URL` in `scripts/checkout-script.html`).
+
 ## The workflow (automated as of 26 Aug 2026)
 
 1. Export the page from Claude Design.
@@ -49,7 +73,7 @@ matching files are added there). `_headers` lets browsers keep
 `assets/` files for a year; a changed file always gets a new name.
 
 prerender.py checks its own result in Chromium (no script errors, headline
-and demos drawn, three pricing buttons wired, Babel gone) and
+and demos drawn, the pricing button and every beta link wired, Babel gone) and
 `scripts/test_seo.py` checks the committed page; if either fails the
 Action stops and the site keeps the previous page. The Action runs on
 every branch, so pushing a branch gives a Cloudflare preview
@@ -121,8 +145,9 @@ Array.from(document.querySelectorAll('#pricing a.btn, #pricing button.btn'))
   .map(el => el.textContent.trim() + ' = ' + el.getAttribute('data-rostas-wired'))
 ```
 
-It lists every button in the pricing section. There should be three, and
-all three should end `= 1`. If any ends `= null`, something's still wrong
+It lists every button in the pricing section. During the beta there is
+one ("Apply for the beta"; three plan cards before 3 Nov 2026), and it
+should end `= 1`. If any ends `= null`, something's still wrong
 on the deployed copy even if the Action succeeded — check you're not
 looking at a cached response.
 

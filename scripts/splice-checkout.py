@@ -56,7 +56,7 @@ VERIFY LIVE, AFTER DEPLOYING (paste into the browser console on rostas.app):
     Array.from(document.querySelectorAll('#pricing a.btn, #pricing button.btn'))
       .map(el => el.textContent.trim() + ' = ' + el.getAttribute('data-rostas-wired'))
 
-All three pricing buttons should end "= 1". If any ends "= null", the splice didn't take on the
+Every pricing button (one during the beta) should end "= 1". If any ends "= null", the splice didn't take on the
 deployed copy even if it looked right locally -- check you deployed the
 OUTPUT file, not the original export.
 """

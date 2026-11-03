@@ -534,8 +534,14 @@ def check(out_dir):
             page.wait_for_timeout(1500)
             wired = page.evaluate("""Array.from(document.querySelectorAll('#pricing a.btn, #pricing button.btn'))
                 .filter(e => e.getAttribute('data-rostas-wired') === '1').length""")
-            if wired < 3:
-                problems.append(f"only {wired} pricing buttons were wired (expected 3).")
+            # One beta card since 3 Nov 2026 (three plan cards before). Back to
+            # 3 when the plan cards return at the end of the beta.
+            if wired < 1:
+                problems.append(f"only {wired} pricing buttons were wired (expected at least 1).")
+            beta = page.evaluate("""Array.from(document.querySelectorAll('[data-rostas-beta]'))
+                .filter(e => e.getAttribute('data-rostas-wired') !== '1').length""")
+            if beta:
+                problems.append(f"{beta} beta links were not wired to the beta message.")
             if page.evaluate("typeof window.Babel") != "undefined":
                 problems.append("Babel is still loaded.")
             page.evaluate(SCROLL_THROUGH)          # let fade-in sections finish
