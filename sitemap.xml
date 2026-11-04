@@ -51,6 +51,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://rostas.app/guides/marae-volunteer-roster</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://rostas.app/privacy</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
