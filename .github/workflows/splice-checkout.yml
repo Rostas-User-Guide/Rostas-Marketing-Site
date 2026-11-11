@@ -40,7 +40,11 @@ concurrency:
 
 jobs:
   splice:
-    runs-on: ubuntu-latest
+    # 11 Nov 2026: pinned to 24.04. ubuntu-latest moved to 26.04, where
+    # Playwright 1.56 refuses to install Chromium ("does not support chromium
+    # on ubuntu26.04-x64"), so the build failed before reaching the page.
+    # Move back to ubuntu-latest once the pinned Playwright supports 26.04.
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
