@@ -56,9 +56,18 @@ class HomePage(unittest.TestCase):
         self.assertIsInstance(offers, list)
         prices = {(o["priceCurrency"], o["price"], o["priceSpecification"]["unitCode"])
                   for o in offers}
-        self.assertEqual(prices, {("NZD", "30", "MON"), ("NZD", "299", "ANN"),
-                                  ("AUD", "30", "MON"), ("AUD", "299", "ANN")})
+        # 13 Nov 2026: NZ only while the page says "Australia to follow".
+        self.assertEqual(prices, {("NZD", "30", "MON"), ("NZD", "299", "ANN")})
         self.assertNotIn('"price":"0"', self.outer_head)
+        self.assertEqual(ld["publisher"]["email"], "info@rostas.app")
+
+    def test_llms_txt(self):
+        # 13 Nov 2026: plain facts for AI assistants at /llms.txt.
+        with open(os.path.join(ROOT, "llms.txt"), encoding="utf-8") as f:
+            text = f.read()
+        self.assertTrue(text.startswith("# Rostas"))
+        for needle in ("info@rostas.app", "NZ$30 a month", "https://rostas.app/guides/"):
+            self.assertIn(needle, text)
 
     def test_icon_in_outer_head(self):
         self.assertIn('<link rel="icon" href="/favicon.ico" sizes="any">', self.outer_head)

@@ -1,0 +1,44 @@
+# Rostas
+
+> Volunteer roster software for churches and community groups in New Zealand.
+> Rostas builds fair rosters, finds replacements automatically when someone
+> can't make it, and gives volunteers a simple app. Made in New Zealand.
+
+## What it does
+- Collects each volunteer's availability and how often they're happy to serve
+- Builds a roster that honours those limits and spreads the load fairly
+- When someone declines, asks the next eligible person one at a time, by app
+  notification or text, until someone accepts, then tells the coordinator
+- Volunteer app at mobile.rostas.app: installs from a link on Android and
+  iPhone, no app store and no password. Volunteers without it get emails and
+  texts with a link
+- Roster Board for coordinators: the whole season on one screen
+
+## Who it's for
+Churches first. Also sports clubs, community meals, school PTAs and other
+groups running recurring volunteer rosters.
+
+## How it runs
+Rostas runs in a Google Sheet in the organisation's own Google account. The
+volunteer list and rosters stay there. It can sync volunteers from Infoodle,
+Planning Center or a Google Sheet, or import from any CSV or spreadsheet.
+
+## Availability and pricing
+- New Zealand, by invitation while Rostas is in beta. Australia to follow.
+- Beta: no subscription charge. Texts are prepaid at 12.5c each (packs from
+  NZ$31.25 for 250). App notifications and emails are free.
+- After the beta: NZ$30 a month or NZ$299 a year, after a 30-day free trial.
+  At least 30 days' notice before the beta ends.
+
+## Contact
+Email: info@rostas.app
+Rostas is a sole trader business in New Zealand (Guy Pilkinton trading as Rostas).
+
+## Key pages
+- Home, features, pricing and FAQ: https://rostas.app/
+- Free roster guides: https://rostas.app/guides/
+- Church volunteer roster guide: https://rostas.app/guides/church-volunteer-roster
+- Volunteer roster template: https://rostas.app/guides/volunteer-roster-template
+- Handling no-shows: https://rostas.app/guides/no-show-replacement-guide
+- Privacy policy: https://rostas.app/privacy
+- Terms of service: https://rostas.app/terms

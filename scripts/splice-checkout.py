@@ -195,20 +195,32 @@ ICON_LINKS = [
     '<link rel="icon" type="image/png" href="/favicon.png">',
     '<link rel="apple-touch-icon" href="/apple-touch-icon.png">',
 ]
-# Real pricing (terms.html section on price): 30-day free trial, then
-# NZ$30 a month or NZ$299 a year; AU$30 / AU$299 in Australia.
+# Real pricing after the beta (terms.html section on price): 30-day free
+# trial, then NZ$30 a month or NZ$299 a year. 13 Nov 2026: NZ only for now
+# (the home FAQ says "Australia to follow"), so the AUD offers came out;
+# markup must match what the page says. No price-0 beta offer on purpose.
 SEO_OFFERS = [
-    {"@type": "Offer", "name": name, "price": price, "priceCurrency": cur,
-     "description": "30-day free trial, then " + label,
+    {"@type": "Offer", "name": name, "price": price, "priceCurrency": "NZD",
+     "eligibleRegion": {"@type": "Country", "name": "New Zealand"},
+     "description": "After the beta: 30-day free trial, then " + label,
      "priceSpecification": {"@type": "UnitPriceSpecification", "price": price,
-                            "priceCurrency": cur, "unitCode": unit}}
-    for name, price, cur, unit, label in (
-        ("Monthly (New Zealand)", "30", "NZD", "MON", "NZ$30 a month"),
-        ("Yearly (New Zealand)", "299", "NZD", "ANN", "NZ$299 a year"),
-        ("Monthly (Australia)", "30", "AUD", "MON", "AU$30 a month"),
-        ("Yearly (Australia)", "299", "AUD", "ANN", "AU$299 a year"),
+                            "priceCurrency": "NZD", "unitCode": unit}}
+    for name, price, unit, label in (
+        ("Monthly (New Zealand)", "30", "MON", "NZ$30 a month"),
+        ("Yearly (New Zealand)", "299", "ANN", "NZ$299 a year"),
     )
 ]
+# 13 Nov 2026 (visibility audit): who is behind Rostas and how to reach it.
+# The footer email is hidden from crawlers by Cloudflare's obfuscation, and
+# nothing tied rostas.app to its Capterra listing.
+SEO_PUBLISHER = {
+    "@type": "Organization", "@id": "https://rostas.app/#org", "name": "Rostas",
+    "url": "https://rostas.app/", "logo": "https://rostas.app/apple-touch-icon.png",
+    "email": "info@rostas.app",
+    "areaServed": {"@type": "Country", "name": "New Zealand"},
+    "founder": {"@type": "Person", "name": "Guy Pilkinton"},
+    "sameAs": ["https://www.capterra.co.nz/software/1243526/Rostas"],
+}
 
 
 def apply_seo_overrides(data):
@@ -263,7 +275,9 @@ def apply_seo_overrides(data):
             ld = json.loads(ld_m.group(2))
         except json.JSONDecodeError as ex:
             return data, [], f"the page's structured data is not valid JSON ({ex})."
+        ld["url"] = "https://rostas.app/"
         ld["offers"] = SEO_OFFERS
+        ld["publisher"] = SEO_PUBLISHER
         edits.append((ld_m.group(0),
                       ld_m.group(1) + json.dumps(ld, ensure_ascii=False,
                                                  separators=(",", ":"))
@@ -288,7 +302,8 @@ def apply_seo_overrides(data):
               "name": "Rostas", "applicationCategory": "BusinessApplication",
               "operatingSystem": "Web, Android, iOS",
               "description": html.unescape(desc_m.group(1)) if desc_m else "",
-              "offers": SEO_OFFERS}
+              "url": "https://rostas.app/", "offers": SEO_OFFERS,
+              "publisher": SEO_PUBLISHER}
         missing.append('<script type="application/ld+json">'
                        + json.dumps(ld, ensure_ascii=False, separators=(",", ":"))
                        + "</script>")
