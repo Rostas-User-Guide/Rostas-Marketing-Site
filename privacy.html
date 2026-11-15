@@ -34,7 +34,7 @@
 <main class="legal">
   <div class="eyebrow">Legal</div>
   <h1>Privacy Policy</h1>
-  <p class="legal-meta">Last updated: 4 November 2026</p>
+  <p class="legal-meta">Last updated: 15 November 2026</p>
 
   <ol class="legal-toc">
     <li><a href="#s1">Who we are</a></li>
@@ -102,7 +102,8 @@
   <p><strong>Optional features.</strong></p>
   <ul>
     <li><strong>Infoodle.</strong> If your organisation connects Infoodle, names, mobile numbers and email addresses are copied from Infoodle into your spreadsheet.</li>
-    <li><strong>AI roster import.</strong> Rostas includes an optional tool for importing an old roster. It sends the roster you paste in, together with your volunteer names and role names, to OpenAI so the names can be matched. It is switched off unless your organisation adds its own OpenAI key, and it asks for confirmation each time before anything is sent.</li>
+    <li><strong>Reading past rosters with AI.</strong> When you start a new roster from a past one, Rostas reads it on your own spreadsheet first. Only if it can't work out the layout does it ask Claude, an AI from Anthropic, through our licence system. For a pasted table or a Word, Excel or .csv file, the table goes with phone numbers and email addresses removed, and only the positions of dates, roles and names come back. For a photo or PDF of a printed roster, the picture itself is sent, including the names in it, so that Claude can copy the table out; phone numbers and email addresses are removed from what comes back. Your volunteer list is never sent. Anthropic does not use this information to train its AI.</li>
+    <li><strong>Older AI roster import.</strong> An older import tool sends the roster you paste in, together with your volunteer names and role names, to OpenAI so the names can be matched. It is switched off unless your organisation adds its own OpenAI key, and it asks for confirmation each time before anything is sent.</li>
   </ul>
 
   <h2 id="s6">6. The Rostas app</h2>
@@ -124,6 +125,7 @@
       <tr><td data-label="Company">Amazon Web Services</td><td data-label="What they do for us">Delivers texts in Australia, and in New Zealand if TNZ is unavailable</td><td data-label="Where">Australia (Sydney)</td></tr>
       <tr><td data-label="Company">Stripe</td><td data-label="What they do for us">Takes payments</td><td data-label="Where">United States and elsewhere</td></tr>
       <tr><td data-label="Company">Resend</td><td data-label="What they do for us">Sends licence and account emails from noreply@rostas.app</td><td data-label="Where">United States</td></tr>
+      <tr><td data-label="Company">Anthropic</td><td data-label="What they do for us">Reads past rosters with AI (Claude) when you start a new roster from one</td><td data-label="Where">United States</td></tr>
       <tr><td data-label="Company">Google and Apple notification services</td><td data-label="What they do for us">Deliver app notifications</td><td data-label="Where">Worldwide</td></tr>
       <tr><td data-label="Company">Porkbun and Google (Gmail)</td><td data-label="What they do for us">Forward and hold email you send to info@rostas.app</td><td data-label="Where">United States</td></tr>
     </tbody>
