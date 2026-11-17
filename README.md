@@ -203,6 +203,16 @@ separate `rostas-licence-worker` repo). That worker URL doesn't change
 even when the worker's code is redeployed, so the Stripe webhook
 destination and this script never need to be touched together.
 
+## Australian prices (17 Nov 2026)
+
+Visitors whose country Cloudflare reports as AU see the subscription prices
+as AU$30 a month / AU$299 a year (what Stripe Checkout now charges them).
+`functions/_middleware.js` swaps the phrases in the page as it is sent;
+`_routes.json` limits it to `/` and `/beta`, so nothing else runs a
+Function. Text pack prices stay NZ$. If the page wording changes, update
+`AU_SWAPS` and run `node --test test/*.test.mjs` (it fails if a phrase no
+longer matches `index.html`).
+
 ## History
 
 - **26 Aug 2026** — found the checkout buttons unwired on the live site
