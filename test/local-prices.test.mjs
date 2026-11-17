@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { onRequest, localise } from "../functions/_middleware.js";
+import { onRequest, localise, countryFor } from "../functions/_middleware.js";
 
 const home = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const beta = readFileSync(new URL("../beta.html", import.meta.url), "utf8");
@@ -75,4 +75,13 @@ test("US visitors get US$ on the home and beta pages", async () => {
 
 test("a country Stripe has no currency for is left in NZ$", () => {
   assert.equal(localise(home, "GB"), home);
+});
+
+test("?country= works on preview copies only, never on the live site", () => {
+  const req = (url, country) => Object.assign(new Request(url), { cf: { country } });
+  assert.equal(countryFor(req("https://au-prices.rostas.pages.dev/?country=au", "NZ")), "AU");
+  assert.equal(countryFor(req("https://rostas.app/?country=AU", "NZ")), "NZ");
+  assert.equal(countryFor(req("https://rostas.pages.dev/?country=AU", "NZ")), "NZ");
+  assert.equal(countryFor(req("https://evil.rostas.pages.dev.example.com/?country=AU", "NZ")), "NZ");
+  assert.equal(countryFor(req("https://au-prices.rostas.pages.dev/", "US")), "US");
 });

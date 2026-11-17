@@ -43,9 +43,19 @@ export function localise(html, country) {
   return head + body;
 }
 
+// Preview copies only (<branch>.rostas.pages.dev): ?country=AU shows the
+// page as that country sees it, so it can be checked without a VPN.
+// Ignored on rostas.app and on rostas.pages.dev itself (production).
+export function countryFor(request) {
+  const url = new URL(request.url);
+  const asked = (url.searchParams.get("country") || "").toUpperCase();
+  if (asked && url.hostname.endsWith(".rostas.pages.dev")) return asked;
+  return request.cf && request.cf.country;
+}
+
 export async function onRequest(context) {
   const { request } = context;
-  const country = request.cf && request.cf.country;
+  const country = countryFor(request);
   if (!SWAPS[country]) return context.next();
 
   // Ask for the full file, never a 304: this browser may have cached the
