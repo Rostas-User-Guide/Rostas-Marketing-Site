@@ -1,5 +1,19 @@
 {
   "version": 1,
-  "include": ["/", "/index.html", "/beta", "/beta.html"],
+  "include": [
+    "/",
+    "/index.html",
+    "/beta",
+    "/beta.html",
+    "/scripts/*",
+    "/test/*",
+    "/.github/*",
+    "/functions/*",
+    "/README.md",
+    "/README",
+    "/readme.md",
+    "/raw-export",
+    "/raw-export.html"
+  ],
   "exclude": []
 }

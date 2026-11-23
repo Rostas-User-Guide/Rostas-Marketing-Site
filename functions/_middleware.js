@@ -53,8 +53,37 @@ export function countryFor(request) {
   return request.cf && request.cf.country;
 }
 
+// 23 Nov 2026 (bug hunt S7): Pages serves the whole repo, so the build
+// scripts, tests, the Action, the README and the unspliced home page
+// (/raw-export, a duplicate home page Google could index) were all public.
+// They stay in the repo (the Action reads raw-export.html and scripts/ from
+// its own checkout, never from the live site); the site just stops serving
+// them. _routes.json sends exactly these paths here.
+const HIDDEN = [/^\/scripts(\/|$)/, /^\/test(\/|$)/, /^\/\.github(\/|$)/, /^\/functions(\/|$)/,
+  /^\/readme(\.md)?$/i, /^\/raw-export(\.html)?$/];
+
+export function isHidden(pathname) {
+  let p = pathname;
+  try { p = decodeURIComponent(pathname); } catch (e) { /* keep as is */ }
+  return HIDDEN.some((re) => re.test(p));
+}
+
+async function notFound(context) {
+  let body = "Not found";
+  let type = "text/plain; charset=utf-8";
+  try {
+    const page = await context.env.ASSETS.fetch(new URL("/404", context.request.url));
+    if (page.ok) { body = await page.text(); type = "text/html; charset=utf-8"; }
+  } catch (e) { /* plain text then */ }
+  return new Response(body, {
+    status: 404,
+    headers: { "Content-Type": type, "X-Robots-Tag": "noindex", "Cache-Control": "no-cache" },
+  });
+}
+
 export async function onRequest(context) {
   const { request } = context;
+  if (isHidden(new URL(request.url).pathname)) return notFound(context);
   const country = countryFor(request);
   if (!SWAPS[country]) return context.next();
 
