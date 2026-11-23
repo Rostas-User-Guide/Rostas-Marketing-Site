@@ -1,5 +1,5 @@
-// 17 Nov 2026 — Show Australian and US visitors the subscription prices in
-// their own currency.
+// 17 Nov 2026 — Show Australian visitors the subscription prices in their
+// own currency. (US$ too until 23 Nov 2026; see SWAPS.)
 //
 // Stripe now charges Australians AU$30 a month / AU$299 a year and US
 // customers US$30 / US$299 (currency options on the same live prices,
@@ -30,8 +30,11 @@ function swapsFor(symbol, zero) {
 
 export const SWAPS = {
   AU: swapsFor("AU$", "A$0.00"),
-  US: swapsFor("US$", "US$0.00"),
 };
+// 23 Nov 2026 (bug hunt S8, Guy): US visitors see NZ$ again. The US stays on
+// the waitlist until US texting (a registered sender) is solved, and US$
+// prices read as an invitation. Stripe keeps its USD amounts on the
+// subscription prices, ready for then: put US back here the same day.
 
 export function localise(html, country) {
   const swaps = SWAPS[country];

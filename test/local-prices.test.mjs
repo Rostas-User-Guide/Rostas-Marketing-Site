@@ -1,5 +1,5 @@
-// 17 Nov 2026 — Tests for functions/_middleware.js (AU$ and US$ prices
-// for Australian and US visitors). Run from the repo root: node --test test/*.test.mjs
+// 17 Nov 2026 — Tests for functions/_middleware.js (AU$ prices for
+// Australian visitors; US$ dropped 23 Nov 2026, the US is on the waitlist). Run from the repo root: node --test test/*.test.mjs
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -64,13 +64,22 @@ test("Australian requests for non-HTML or redirects pass through", async () => {
   assert.equal(await css.text(), "NZ$30 a month");
 });
 
-test("US visitors get US$ on the home and beta pages", async () => {
-  const out = bodyOf(localise(home, "US"));
-  for (const p of ["US$30 a month", "US$299 a year", "Saves US$61"]) assert.ok(out.includes(p), p);
-  assert.ok(!/NZ\$30 a month|NZ\$299 a year|NZ\$61/.test(out));
-  assert.ok(bodyOf(localise(beta, "US")).includes("US$0.00"));
-  const res = await onRequest(fakeContext("US"));
-  assert.ok((await res.text()).includes("US$299 a year"));
+// 23 Nov 2026 (bug hunt S8): the US is on the waitlist, so no US$ prices.
+test("US visitors see NZ$, untouched (the US is on the waitlist)", async () => {
+  assert.equal(localise(home, "US"), home);
+  assert.equal(localise(beta, "US"), beta);
+  const ctx = fakeContext("US");
+  const res = await onRequest(ctx);
+  assert.equal(ctx.seen.calledWith, undefined);
+  const out = await res.text();
+  assert.ok(!out.includes("US$"));
+  assert.ok(out.includes("NZ$299 a year"));
+});
+
+test("terms say text credits are NZ$ in every country (packs have no other currency)", () => {
+  const terms = readFileSync(new URL("../terms.html", import.meta.url), "utf8");
+  assert.match(terms, /Credits are priced in New Zealand dollars in every country\./);
+  assert.doesNotMatch(terms, /differs between countries/);
 });
 
 test("a country Stripe has no currency for is left in NZ$", () => {

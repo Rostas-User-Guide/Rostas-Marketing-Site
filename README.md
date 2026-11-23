@@ -203,17 +203,20 @@ separate `rostas-licence-worker` repo). That worker URL doesn't change
 even when the worker's code is redeployed, so the Stripe webhook
 destination and this script never need to be touched together.
 
-## Australian and US prices (17 Nov 2026)
+## Australian prices (17 Nov 2026; US dropped 23 Nov 2026)
 
-Visitors whose country Cloudflare reports as AU or US see the subscription
-prices as AU$/US$30 a month and AU$/US$299 a year (what Stripe Checkout
-now charges them). Other countries see NZ$, which is what Stripe charges
-them; add a country only once Stripe has its currency on the prices.
-`functions/_middleware.js` swaps the phrases in the page as it is sent;
-`_routes.json` limits it to `/` and `/beta`, so nothing else runs a
-Function. Text pack prices stay NZ$. If the page wording changes, update
-`SWAPS` and run `node --test test/*.test.mjs` (it fails if a phrase no
-longer matches `index.html`).
+Visitors whose country Cloudflare reports as AU see the subscription
+prices as AU$30 a month and AU$299 a year (what Stripe Checkout charges
+them). Everyone else, the US included, sees NZ$. Stripe also has US$
+amounts on the subscription prices, but the US stays on the waitlist until
+US texting is solved, so US$ prices aren't shown (23 Nov 2026); add `US`
+back to `SWAPS` when it opens. Add a country only once Stripe has its
+currency on the prices. `functions/_middleware.js` swaps the phrases in
+the page as it is sent; `_routes.json` limits it to `/` and `/beta` (and
+the hidden repo files, which get a 404). Text pack prices are NZ$ in every
+country (terms section 8). If the page wording changes, update `SWAPS` and
+run `node --test test/*.test.mjs` (it fails if a phrase no longer matches
+`index.html`).
 
 ## History
 
