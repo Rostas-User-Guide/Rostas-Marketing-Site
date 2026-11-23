@@ -24,10 +24,11 @@ volunteer list and rosters stay there. It can sync volunteers from Infoodle,
 Planning Center or a Google Sheet, or import from any CSV or spreadsheet.
 
 ## Availability and pricing
-- New Zealand, by invitation while Rostas is in beta. Australia to follow.
+- New Zealand and Australia, by invitation while Rostas is in beta.
 - Beta: no subscription charge. Texts are prepaid at 12.5c each (packs from
   NZ$31.25 for 250). App notifications and emails are free.
-- After the beta: NZ$30 a month or NZ$299 a year, after a 30-day free trial.
+- After the beta: NZ$30 a month or NZ$299 a year (AU$30 / AU$299 in
+  Australia), after a 30-day free trial.
   At least 30 days' notice before the beta ends.
 
 ## Contact

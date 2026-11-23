@@ -56,8 +56,11 @@ class HomePage(unittest.TestCase):
         self.assertIsInstance(offers, list)
         prices = {(o["priceCurrency"], o["price"], o["priceSpecification"]["unitCode"])
                   for o in offers}
-        # 13 Nov 2026: NZ only while the page says "Australia to follow".
-        self.assertEqual(prices, {("NZD", "30", "MON"), ("NZD", "299", "ANN")})
+        # 23 Nov 2026 (bug hunt S4): NZ and Australia, as the page says.
+        self.assertEqual(prices, {("NZD", "30", "MON"), ("NZD", "299", "ANN"),
+                                  ("AUD", "30", "MON"), ("AUD", "299", "ANN")})
+        served = {c["name"] for c in ld["publisher"]["areaServed"]}
+        self.assertEqual(served, {"New Zealand", "Australia"})
         self.assertNotIn('"price":"0"', self.outer_head)
         self.assertEqual(ld["publisher"]["email"], "info@rostas.app")
 

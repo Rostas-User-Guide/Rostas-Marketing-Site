@@ -196,9 +196,11 @@ ICON_LINKS = [
     '<link rel="apple-touch-icon" href="/apple-touch-icon.png">',
 ]
 # Real pricing after the beta (terms.html section on price): 30-day free
-# trial, then NZ$30 a month or NZ$299 a year. 13 Nov 2026: NZ only for now
-# (the home FAQ says "Australia to follow"), so the AUD offers came out;
-# markup must match what the page says. No price-0 beta offer on purpose.
+# trial, then NZ$30 a month or NZ$299 a year. 13 Nov 2026: NZ only while the
+# home FAQ said "Australia to follow". 23 Nov 2026 (bug hunt S4, Guy): the
+# page says New Zealand and Australia, and Stripe charges Australians AU$30 /
+# AU$299, so the AUD offers are back; markup must match what the page says.
+# No price-0 beta offer on purpose.
 SEO_OFFERS = [
     {"@type": "Offer", "name": name, "price": price, "priceCurrency": "NZD",
      "eligibleRegion": {"@type": "Country", "name": "New Zealand"},
@@ -209,6 +211,16 @@ SEO_OFFERS = [
         ("Monthly (New Zealand)", "30", "MON", "NZ$30 a month"),
         ("Yearly (New Zealand)", "299", "ANN", "NZ$299 a year"),
     )
+] + [
+    {"@type": "Offer", "name": name, "price": price, "priceCurrency": "AUD",
+     "eligibleRegion": {"@type": "Country", "name": "Australia"},
+     "description": "After the beta: 30-day free trial, then " + label,
+     "priceSpecification": {"@type": "UnitPriceSpecification", "price": price,
+                            "priceCurrency": "AUD", "unitCode": unit}}
+    for name, price, unit, label in (
+        ("Monthly (Australia)", "30", "MON", "AU$30 a month"),
+        ("Yearly (Australia)", "299", "ANN", "AU$299 a year"),
+    )
 ]
 # 13 Nov 2026 (visibility audit): who is behind Rostas and how to reach it.
 # The footer email is hidden from crawlers by Cloudflare's obfuscation, and
@@ -217,7 +229,8 @@ SEO_PUBLISHER = {
     "@type": "Organization", "@id": "https://rostas.app/#org", "name": "Rostas",
     "url": "https://rostas.app/", "logo": "https://rostas.app/apple-touch-icon.png",
     "email": "info@rostas.app",
-    "areaServed": {"@type": "Country", "name": "New Zealand"},
+    "areaServed": [{"@type": "Country", "name": "New Zealand"},
+                   {"@type": "Country", "name": "Australia"}],
     "founder": {"@type": "Person", "name": "Guy Pilkinton"},
     "sameAs": ["https://www.capterra.co.nz/software/1243526/Rostas"],
 }
