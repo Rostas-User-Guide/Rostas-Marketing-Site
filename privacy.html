@@ -34,7 +34,7 @@
 <main class="legal">
   <div class="eyebrow">Legal</div>
   <h1>Privacy Policy</h1>
-  <p class="legal-meta">Last updated: 15 November 2026</p>
+  <p class="legal-meta">Last updated: 23 November 2026</p>
 
   <ol class="legal-toc">
     <li><a href="#s1">Who we are</a></li>
@@ -86,7 +86,7 @@
   <p>The rostas.app website does not use advertising or analytics cookies. Like most websites, our hosting provider (Cloudflare) records technical details of each visit, such as IP address, for security. The site loads fonts from Google, which means Google receives your IP address when the page loads.</p>
 
   <h2 id="s5">5. Information about volunteers</h2>
-  <p><strong>Held in your Google account, not by us:</strong> names, mobile numbers, email addresses, roles and role preferences, availability, household and buddy links, how often each person serves, notes, rosters, message history, and a record of which devices have the Rostas app.</p>
+  <p><strong>Held in your Google account, not by us:</strong> names, mobile numbers, email addresses, roles and role preferences, availability, household and buddy links, how often each person serves, notes, rosters, message history, a record of which devices have the Rostas app, and the address of any profile photo a volunteer has added.</p>
   <p>Emails to volunteers are sent from your own Google account.</p>
   <p><strong>Passing through or held on our systems:</strong></p>
   <table class="legal-table">
@@ -95,13 +95,15 @@
       <tr><td data-label="What">A volunteer's mobile number and the text of a message</td><td data-label="When">Each time Rostas sends a text through our text service</td><td data-label="What we keep">Nothing. We pass it to the phone carrier and do not store the number or the message. We keep only the count of texts used.</td></tr>
       <tr><td data-label="What">The title and wording of an app notification, and the volunteer's ID number</td><td data-label="When">Each time Rostas sends an app notification</td><td data-label="What we keep">Nothing after it is sent.</td></tr>
       <tr><td data-label="What">App notification details for each phone: a technical address and keys issued by the phone's browser, phone type, browser description, volunteer ID number, your licence key, and the dates first and last seen</td><td data-label="When">When a volunteer turns notifications on</td><td data-label="What we keep">Kept until the volunteer turns notifications off, or 90 days after the app was last opened.</td></tr>
-      <tr><td data-label="What">Short links (the rostas.app/r links in texts): the address the link leads to, how many times it was opened and when it was last opened</td><td data-label="When">Each time Rostas creates a link</td><td data-label="What we keep">Kept for 12 months, then deleted.</td></tr>
+      <tr><td data-label="What">Short links (the rostas.app/r links in texts): the address the link leads to, how many times it was opened and when it was last opened</td><td data-label="When">Each time Rostas creates a link</td><td data-label="What we keep">Kept for 12 months after Rostas last sent the link, then deleted.</td></tr>
+      <tr><td data-label="What">A volunteer's profile photo, if they choose to add one in the app: a small square picture, with your organisation's licence key, the volunteer's ID number and the date it was added</td><td data-label="When">When the volunteer adds or changes their photo</td><td data-label="What we keep">The current photo only; adding a new one deletes the old one. It is kept until the volunteer removes it in the app's Settings or a coordinator removes it. See <a href="#s9">section 9</a>.</td></tr>
     </tbody>
   </table>
   <p>Our systems keep short-lived technical logs for fault-finding. These can include the address a short link led to.</p>
   <p><strong>Optional features.</strong></p>
   <ul>
     <li><strong>Infoodle.</strong> If your organisation connects Infoodle, names, mobile numbers and email addresses are copied from Infoodle into your spreadsheet.</li>
+    <li><strong>Planning Center.</strong> If your organisation connects Planning Center, the names, mobile numbers, email addresses and household links of people in your Planning Center roster groups are copied into your spreadsheet. To keep the connection working, our licence system holds your organisation's Planning Center access keys, encrypted. They are deleted when you disconnect Planning Center.</li>
     <li><strong>Reading past rosters with AI.</strong> When you start a new roster from a past one, Rostas reads it on your own spreadsheet first. Only if it can't work out the layout does it ask Claude, an AI from Anthropic, through our licence system. For a pasted table or a Word, Excel or .csv file, the table goes with phone numbers and email addresses removed, and only the positions of dates, roles and names come back. For a photo or PDF of a printed roster, the picture itself is sent, including the names in it, so that Claude can copy the table out; phone numbers and email addresses are removed from what comes back. Your volunteer list is never sent. Anthropic does not use this information to train its AI.</li>
     <li><strong>Older AI roster import.</strong> An older import tool sends the roster you paste in, together with your volunteer names and role names, to OpenAI so the names can be matched. It is switched off unless your organisation adds its own OpenAI key, and it asks for confirmation each time before anything is sent.</li>
   </ul>
@@ -110,7 +112,8 @@
   <p>The app is optional. It installs from a personal link, with no password and no app store account.</p>
   <ul>
     <li>On the phone, the app stores the volunteer's name, the organisation's name, the details that keep them signed in, and a history of notifications received.</li>
-    <li>The app does not collect location, contacts, photos or anything else from the phone.</li>
+    <li>A volunteer can choose to add a profile photo in the app's Settings, so coordinators can see who is who. The app sends us only a small square copy of the one picture they choose, and only if they add one. The photo is shown at a web address that cannot be guessed, so anyone who has that exact address can see it, much like a link. <a href="#s5">Section 5</a> says what we keep.</li>
+    <li>The app does not collect location, contacts or anything else from the phone.</li>
     <li>Notifications are delivered by the phone maker's notification service (Google for Android and Chrome, Apple for iPhone and iPad). The content is encrypted in transit so those services cannot read it.</li>
     <li>A volunteer can turn notifications off, or remove the app, from the app's Settings at any time.</li>
   </ul>
@@ -121,11 +124,13 @@
     <tbody>
       <tr><td data-label="Company">Google</td><td data-label="What they do for us">Hosts your spreadsheet and script, and sends email, in your own Google account</td><td data-label="Where">Worldwide</td></tr>
       <tr><td data-label="Company">Cloudflare</td><td data-label="What they do for us">Hosts our website, the app, our licence system and short links</td><td data-label="Where">Worldwide</td></tr>
-      <tr><td data-label="Company">TNZ Group</td><td data-label="What they do for us">Delivers texts in New Zealand</td><td data-label="Where">New Zealand</td></tr>
-      <tr><td data-label="Company">Amazon Web Services</td><td data-label="What they do for us">Delivers texts in Australia, and in New Zealand if TNZ is unavailable</td><td data-label="Where">Australia (Sydney)</td></tr>
+      <tr><td data-label="Company">TNZ Group</td><td data-label="What they do for us">Delivers texts in New Zealand and Australia</td><td data-label="Where">New Zealand</td></tr>
+      <tr><td data-label="Company">Amazon Web Services</td><td data-label="What they do for us">Delivers texts to other countries, and in New Zealand and Australia if TNZ is unavailable</td><td data-label="Where">Australia (Sydney)</td></tr>
       <tr><td data-label="Company">Stripe</td><td data-label="What they do for us">Takes payments</td><td data-label="Where">United States and elsewhere</td></tr>
       <tr><td data-label="Company">Resend</td><td data-label="What they do for us">Sends licence and account emails from noreply@rostas.app</td><td data-label="Where">United States</td></tr>
       <tr><td data-label="Company">Anthropic</td><td data-label="What they do for us">Reads past rosters with AI (Claude) when you start a new roster from one</td><td data-label="Where">United States</td></tr>
+      <tr><td data-label="Company">OpenAI</td><td data-label="What they do for us">Matches names in the older AI roster import, only if your organisation adds its own OpenAI key</td><td data-label="Where">United States</td></tr>
+      <tr><td data-label="Company">Planning Center</td><td data-label="What they do for us">Supplies your volunteer list, only if your organisation connects Planning Center</td><td data-label="Where">United States</td></tr>
       <tr><td data-label="Company">Google and Apple notification services</td><td data-label="What they do for us">Deliver app notifications</td><td data-label="Where">Worldwide</td></tr>
       <tr><td data-label="Company">Porkbun and Google (Gmail)</td><td data-label="What they do for us">Forward and hold email you send to info@rostas.app</td><td data-label="Where">United States</td></tr>
     </tbody>
@@ -140,6 +145,8 @@
     <li>Customer and licence records: for as long as you have a subscription, then for up to seven years where tax and accounting law requires it.</li>
     <li>Beta applications: until Rostas opens to everyone, or sooner if you ask us to delete yours (email <a href="mailto:info@rostas.app">info@rostas.app</a>).</li>
     <li>App notification details and short links: as in <a href="#s5">section 5</a>.</li>
+    <li>Volunteer profile photos: until the volunteer or a coordinator removes the photo, or the volunteer adds a new one. A removed photo can still appear for up to an hour while copies held for speed expire. Photos are not deleted automatically when an organisation stops using Rostas, and the remove buttons stop working once a subscription ends, so in that case email <a href="mailto:info@rostas.app">info@rostas.app</a> and we will delete your organisation's photos.</li>
+    <li>Planning Center access keys: until your organisation disconnects Planning Center.</li>
     <li>Volunteer information in your spreadsheet: for as long as your organisation keeps it. It is yours to delete.</li>
   </ul>
 
