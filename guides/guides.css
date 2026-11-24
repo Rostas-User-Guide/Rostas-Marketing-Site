@@ -349,3 +349,9 @@ table.legal-table th {
     color: var(--muted);
   }
 }
+
+/* 24 Nov 2026: related guides at the foot of each guide (internal links for search). */
+.related-guides { margin-bottom: 40px; }
+.related-guides h2 { font-size: 22px; margin: 48px 0 12px; }
+.related-guides ul { padding-left: 20px; }
+.related-guides li { margin: 6px 0; }

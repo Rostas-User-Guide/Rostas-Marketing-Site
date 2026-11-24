@@ -38,8 +38,16 @@ Rostas is a sole trader business in New Zealand (Guy Pilkinton trading as Rostas
 ## Key pages
 - Home, features, pricing and FAQ: https://rostas.app/
 - Free roster guides: https://rostas.app/guides/
-- Church volunteer roster guide: https://rostas.app/guides/church-volunteer-roster
-- Volunteer roster template: https://rostas.app/guides/volunteer-roster-template
-- Handling no-shows: https://rostas.app/guides/no-show-replacement-guide
 - Privacy policy: https://rostas.app/privacy
 - Terms of service: https://rostas.app/terms
+
+## Free guides
+- How to set up a church volunteer roster: https://rostas.app/guides/church-volunteer-roster
+- Free volunteer roster template: https://rostas.app/guides/volunteer-roster-template
+- Handling no-shows and finding replacements fast: https://rostas.app/guides/no-show-replacement-guide
+- Volunteer reminder message templates: https://rostas.app/guides/volunteer-reminder-templates
+- How to prevent volunteer burnout: https://rostas.app/guides/prevent-volunteer-burnout
+- How to recruit volunteers: https://rostas.app/guides/recruiting-volunteers
+- How to roster a working bee or one-off event: https://rostas.app/guides/working-bee-event-roster
+- How to set up a sports club volunteer roster: https://rostas.app/guides/sports-club-roster
+- Rostering volunteers for a marae hui or tangihanga: https://rostas.app/guides/marae-volunteer-roster

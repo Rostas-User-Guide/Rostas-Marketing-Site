@@ -341,5 +341,98 @@ class Guides(unittest.TestCase):
                 self.assertTrue(os.path.exists(os.path.join(ROOT, href.lstrip("/") + ".html")), f"{slug}: {href}")
 
 
+class SearchPolish(unittest.TestCase):
+    """24 Nov 2026 SEO review: guide dates and breadcrumbs, related-guide links
+    (each guide reachable from at least two others, the church guide from most),
+    descriptions Google won't cut off, sitemap lastmod, every guide in llms.txt,
+    and FAQ structured data that matches the visible FAQ."""
+
+    @classmethod
+    def setUpClass(cls):
+        d = os.path.join(ROOT, "guides")
+        cls.slugs = sorted(f[:-5] for f in os.listdir(d) if f.endswith(".html") and f != "index.html")
+        cls.pages = {s: open(os.path.join(d, s + ".html"), encoding="utf-8").read() for s in cls.slugs}
+        cls.index = open(os.path.join(d, "index.html"), encoding="utf-8").read()
+
+    @staticmethod
+    def graph(html):
+        ld = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', html, re.S).group(1))
+        return {n["@type"]: n for n in ld.get("@graph", [ld])}
+
+    def test_guide_article_has_dates_author_breadcrumb(self):
+        for slug, html in self.pages.items():
+            g = self.graph(html)
+            art = g["Article"]
+            for key in ("datePublished", "dateModified", "author", "image", "headline"):
+                self.assertIn(key, art, slug)
+            self.assertRegex(art["datePublished"], r"^\d{4}-\d{2}-\d{2}$", slug)
+            self.assertLessEqual(art["datePublished"], art["dateModified"], slug)
+            crumbs = g["BreadcrumbList"]["itemListElement"]
+            self.assertEqual(crumbs[-1]["item"], f"https://rostas.app/guides/{slug}", slug)
+
+    def test_guides_list_structured_data(self):
+        g = self.graph(self.index)
+        listed = [i["url"].rsplit("/", 1)[1] for i in g["CollectionPage"]["mainEntity"]["itemListElement"]]
+        self.assertEqual(sorted(listed), self.slugs)
+        self.assertIn("BreadcrumbList", g)
+
+    def test_related_guides_link_around(self):
+        inbound = {s: 0 for s in self.slugs}
+        for slug, html in self.pages.items():
+            self.assertIn('class="related-guides"', html, slug)
+            for target in set(re.findall(r'href="/guides/([a-z0-9-]+)"', html)) - {slug}:
+                inbound[target] += 1
+        for slug, n in inbound.items():
+            self.assertGreaterEqual(n, 2, slug)
+        self.assertGreaterEqual(inbound["church-volunteer-roster"], len(self.slugs) - 2)
+
+    def test_descriptions_fit_in_results(self):
+        files = ["guides/index.html", "privacy.html", "terms.html"] + [f"guides/{s}.html" for s in self.slugs]
+        for name in files:
+            html = open(os.path.join(ROOT, name), encoding="utf-8").read()
+            d = re.search(r'<meta name="description" content="([^"]*)"', html).group(1)
+            self.assertLessEqual(len(d.replace("&amp;", "&")), 160, name)
+
+    def test_sitemap_lastmod_and_llms_txt_list_every_guide(self):
+        sm = open(os.path.join(ROOT, "sitemap.xml"), encoding="utf-8").read()
+        self.assertEqual(sm.count("<loc>"), sm.count("<lastmod>"))
+        self.assertNotIn("<changefreq>", sm)
+        llms = open(os.path.join(ROOT, "llms.txt"), encoding="utf-8").read()
+        for slug in self.slugs:
+            self.assertIn(f"https://rostas.app/guides/{slug}\n", llms, slug)
+
+
+class HomeSearchPolish(unittest.TestCase):
+    """24 Nov 2026: the home page links straight to the key guides, its
+    description fits in results, and its FAQ structured data says exactly
+    what the visible FAQ says (so an FAQ edit can't leave it stale).
+    Checked on the real page unpacked from raw-export.html."""
+
+    @classmethod
+    def setUpClass(cls):
+        out = os.path.join(tempfile.mkdtemp(), "page.html")
+        subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "export_template.py"), "extract",
+                        os.path.join(ROOT, "raw-export.html"), out], check=True, capture_output=True)
+        cls.html = open(out, encoding="utf-8").read()
+
+    def test_links_to_key_guides(self):
+        for slug in ("church-volunteer-roster", "volunteer-roster-template", "sports-club-roster"):
+            self.assertIn(f'href="/guides/{slug}"', self.html, slug)
+
+    def test_description_fits(self):
+        d = re.search(r'<meta name="description" content="([^"]*)"', self.html).group(1)
+        self.assertLessEqual(len(d), 160)
+
+    def test_faq_structured_data_matches_page(self):
+        import html as h
+        blocks = re.findall(r'<script type="application/ld\+json">(.*?)</script>', self.html, re.S)
+        faq = [json.loads(b) for b in blocks if '"FAQPage"' in b]
+        self.assertEqual(len(faq), 1, "one FAQPage block")
+        visible = [re.sub(r"\s+", " ", h.unescape(re.sub(r"<[^>]+>", "", q))).strip()
+                   for q in re.findall(r'<button class="faq-q"[^>]*>(.*?)</button>', self.html, re.S)]
+        self.assertEqual([q["name"] for q in faq[0]["mainEntity"]], visible)
+        for q in faq[0]["mainEntity"]:
+            self.assertTrue(q["acceptedAnswer"]["text"], q["name"])
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
