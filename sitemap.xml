@@ -2,67 +2,54 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://rostas.app/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
+    <lastmod>2026-11-24</lastmod>
   </url>
   <url>
     <loc>https://rostas.app/guides/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <lastmod>2026-11-24</lastmod>
   </url>
   <url>
     <loc>https://rostas.app/guides/volunteer-roster-template</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <lastmod>2026-11-24</lastmod>
   </url>
   <url>
     <loc>https://rostas.app/guides/no-show-replacement-guide</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <lastmod>2026-11-24</lastmod>
   </url>
   <url>
     <loc>https://rostas.app/guides/church-volunteer-roster</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <lastmod>2026-11-24</lastmod>
   </url>
   <url>
     <loc>https://rostas.app/guides/volunteer-reminder-templates</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <lastmod>2026-11-24</lastmod>
   </url>
   <url>
     <loc>https://rostas.app/guides/prevent-volunteer-burnout</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <lastmod>2026-11-24</lastmod>
   </url>
   <url>
     <loc>https://rostas.app/guides/recruiting-volunteers</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <lastmod>2026-11-24</lastmod>
   </url>
   <url>
     <loc>https://rostas.app/guides/working-bee-event-roster</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <lastmod>2026-11-24</lastmod>
   </url>
   <url>
     <loc>https://rostas.app/guides/sports-club-roster</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <lastmod>2026-11-24</lastmod>
   </url>
   <url>
     <loc>https://rostas.app/guides/marae-volunteer-roster</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <lastmod>2026-11-24</lastmod>
   </url>
   <url>
     <loc>https://rostas.app/privacy</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
+    <lastmod>2026-11-23</lastmod>
   </url>
   <url>
     <loc>https://rostas.app/terms</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
+    <lastmod>2026-11-24</lastmod>
   </url>
 </urlset>
